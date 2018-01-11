@@ -7,45 +7,50 @@
 }
 
 .pdf-viewer--button {
-	background-color: rgba(0, 0, 0, 0.6);
-	opacity: 0.2;
+	background-color: rgba(0, 0, 0, 0.3);
+	opacity: 0.0;
 	transition: opacity .5s ease;
-	padding: .7em .3em;
 	font-size: 3em;
+	width:20%;
+	top: 0;
+	bottom: 0;
 	position: absolute;
-	top: 50%;
-	z-index: 2;
 	user-select: none;
 	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 2;
 }
 
 .pdf-viewer--button:hover {
-	opacity: 0.7;
+	opacity: 0.3;
 }
 
 .pdf-viewer--button:active {
-	opacity: 1.0;
+	opacity: 0.6;
 }
 
 .pdf-viewer--prev {
 	left: 0;
-	border-radius: 0 100em 100em 0;
-	border-right: 1px solid black;
 }
 
 .pdf-viewer--next {
 	right: 0;
-	border-radius: 100em 0 0 100em;
-	border-left: 1px solid black;
 }
 </style>
 
 <template>
 	<div class=pdf-viewer>
-		<div class="pdf-viewer--button pdf-viewer--prev" @click="page--">&lt;</div>
-		<div class="pdf-viewer--button pdf-viewer--next" @click="page++">&gt;</div>
+		<div class="pdf-viewer--button pdf-viewer--prev" v-if=loaded @click="page--"><span>&lt;</span></div>
+		<div class="pdf-viewer--button pdf-viewer--next" v-if=loaded @click="page++"><span>&gt;</span></div>
 
-		<pdf-preview :src=src :page.sync=page @update:content=updated />
+		<pdf-preview
+			:src=src
+			:page.sync=page
+			:scale=scale
+			@loaded="loaded = true"
+			@update:content=updated />
 	</div>
 </template>
 
@@ -54,13 +59,19 @@ import Preview from './Preview';
 
 
 export default {
-	props: ['src'],
+	props: ['src', 'scale'],
 	components: {
 		'pdf-preview': Preview,
+	},
+	watch: {
+		src() {
+			this.loaded = false;
+		},
 	},
 	data() {
 		return {
 			page: 1,
+			loaded: false,
 		};
 	},
 	methods: {

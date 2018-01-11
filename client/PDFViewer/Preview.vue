@@ -15,7 +15,6 @@
 	left: 0;
 	bottom: 0;
 	right: 0;
-	z-index: 1;
 }
 </style>
 
@@ -25,6 +24,7 @@
 	color: transparent;
 	white-space: pre;
 	cursor: text;
+	z-index: 5;
 }
 
 .pdf-viewer--preview .text-layer > div::selection {
@@ -51,13 +51,13 @@ PDFJS.workerSrc = "/worker.js"
 
 
 export default {
-	props: ['page', 'src'],
+	props: ['page', 'src', 'scale'],
 	data() {
 		return {
 			pagesNum: 0,
 			pdfData: null,
 			pageData: null,
-			viewport: {width: 595.28, height: 841.89},
+			viewport: {width: 595.28 * (this.scale || 1.0), height: 841.89 * (this.scale || 1.0)},
 		};
 	},
 	watch: {
@@ -65,9 +65,12 @@ export default {
 			this.load();
 		},
 		page(val) {
+			if (this.pageNum < 1) {
+				return;
+			}
 			if (val < 1) {
 				this.$emit('update:page', 1);
-			} else if (val >= this.pagesNum) {
+			} else if (val > this.pagesNum) {
 				this.$emit('update:page', this.pagesNum);
 			} else {
 				this.rendering();
@@ -94,6 +97,7 @@ export default {
 						this.$emit('update:page', 1);
 					}
 					this.pagesNum = pdf.pdfInfo.numPages;
+					this.pageData = null;
 
 					this.$emit('loaded', {
 						url: this.src,
@@ -104,6 +108,8 @@ export default {
 				})
 				.catch(err => {
 					alert('failed to read');
+					this.pagesNum = 0;
+					this.pdfData = this.pageData = null;
 					console.error(err);
 				})
 		},
@@ -118,7 +124,7 @@ export default {
 						const canvas = this.imageLayer;
 						const context = canvas.getContext('2d');
 
-						this.viewport = page.getViewport(1.0);
+						this.viewport = page.getViewport(this.scale || 1.0);
 
 						page.render({
 							canvasContext: context,
