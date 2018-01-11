@@ -1,0 +1,147 @@
+<style scoped>
+.wrapper {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+header {
+	border-bottom: 1px solid gray;
+	padding: .5em .5em;
+	margin: 0 .5em;
+}
+header a {
+	color: black;
+	text-decoration: none;
+	margin-right: 1em;
+}
+header > a {
+	font-weight: bold;
+	color: #b3424a;
+}
+.menu a.router-link-exact-active {
+	text-decoration: underline;
+}
+
+.wrapper > div {
+	flex: 1 1 0;
+	display: flex;
+}
+nav {
+	border-right: 1px solid gray;
+	margin: .5em 0;
+	padding: 0 1em;
+	width: 15em;
+}
+ul {
+	padding-left: 1em;
+}
+
+.content-area {
+	flex: 1 1 0;
+	display: flex;
+	flex-direction: column;
+}
+.content-area > div {
+	flex: 1 1 0;
+	padding: 1em;
+	overflow: auto;
+}
+footer {
+	text-align: right;
+	border-top: 1px solid gray;
+	margin: 0 .5em;
+}
+</style>
+
+<template>
+	<div class=wrapper>
+		<header>
+			<router-link to="/">Thesis Library</router-link>
+
+			<span class=menu>
+				<router-link to="/search">論文を探す</router-link>
+				<router-link to="/upload">アップロードする</router-link>
+			</span>
+		</header>
+
+		<div>
+			<nav>
+				<ul>
+					<li>2017年度</li>
+					<ul>
+						<li>なんかすごい論文</li>
+						<li>すごくすごい論文</li>
+						<li>やばい論文</li>
+						<li>なんかすごい論文</li>
+						<li>すごくすごい論文</li>
+						<li>やばい論文</li>
+						<li>なんかすごい論文</li>
+						<li>すごくすごい論文</li>
+						<li>やばい論文</li>
+						<li>なんかすごい論文</li>
+						<li>すごくすごい論文</li>
+						<li>やばい論文</li>
+					</ul>
+					<li>2019年度</li>
+					<li>2020年度</li>
+					<li>2021年度</li>
+				</ul>
+			</nav>
+
+			<div class=content-area>
+				<router-view />
+
+				<footer><small>各論文の著作権は原著者に帰属します。これらの無断転載を禁じます。 2018 MacRat &lt;m@crat.jp&gt;</small></footer>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+
+
+VueRouter.install(Vue);
+
+
+Vue.mixin({
+	mounted() {
+		let { title } = this.$options;
+		if (title) {
+			if (typeof title === 'function') {
+				title = title.call(this);
+			}
+			document.title = `${title} - Thesis Library`;
+		} else {
+			document.title = "Thesis Library";
+		}
+	},
+});
+
+
+export default {
+	router: new VueRouter({
+		mode: 'history',
+		routes: [
+			{
+				path: '/',
+				component: () => require.ensure([], require => require('./TopPage'), '/top'),
+			},
+			{
+				path: '/search',
+				component: () => require.ensure([], require => require('./SearchPage'), '/search'),
+			},
+			{
+				path: '/upload',
+				component: () => require.ensure([], require => require('./UploadPage'), '/upload'),
+			},
+			{
+				path: '/:year/:author/:title*',
+				component: () => require.ensure([], require => require('./DetailPage'), '/detail'),
+			},
+		],
+	})
+}
+</script>
