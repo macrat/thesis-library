@@ -93,7 +93,7 @@ footer {
 			<div class=content-area>
 				<router-view />
 
-				<footer><small>各論文の著作権は原著者に帰属します。これらの無断転載を禁じます。 2018 MacRat &lt;m@crat.jp&gt;</small></footer>
+				<footer><small>論文の著作権はそれぞれの著者に帰属します。 学術目的以外の無断転載を禁じます。</small></footer>
 			</div>
 		</div>
 	</div>

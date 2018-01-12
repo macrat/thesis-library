@@ -1,3 +1,20 @@
+<style scoped>
+.title {
+	width: 100%;
+}
+
+.overview, .memo {
+	resize: vertical;
+	width: 100%;
+}
+.overview {
+	height: 30em;
+}
+.memo {
+	height: 5em;
+}
+</style>
+
 <template>
 	<div>
 		<h1>アップロードする</h1>
@@ -9,25 +26,25 @@
 					<option value=master>修士</option>
 					<option value=bachelor selected>学士</option>
 				</select>
-				<label><input type=number min=2000 max=2099 v-model=year required>年度卒業</label>
+				<label><input type=number min=2000 :max="(new Date()).getFullYear()" v-model=year required>年度卒業</label>
 			</p>
 
-			<input v-model=title placeholder="タイトル" style="width: 100%;" required><br>
-			<textarea v-model=overview placeholder="論文概要" style="width: 100%; height: 30em;" required /><br>
+			<input v-model=title placeholder="タイトル" class=title required><br>
+			<textarea v-model=overview placeholder="論文概要" class=overview required /><br>
 
 			<hr>
 
-			メモ:<br>
-			<textarea v-model=memo placeholder="後輩に伝えたい事があればどうぞ" style="width: 100%; height: 5em;"/>
+			<label>メモ:<br>
+			<textarea v-model=memo placeholder="後輩に伝えたい事があればどうぞ" class=memo /></label>
 
 			<hr>
 
-			<input @change=fileChange type=file required ref=fileinput><br>
+			<input @change=fileChange type=file accept=".pdf" required ref=fileinput><br>
 			<pdf-viewer scale=0.3 :src=rawPDF />
 
 			<hr>
 
-			<label>修正用のパスワード： <input type=password></label><br>
+			<label>修正用パスワード（省略可）： <input type=password></label><br>
 			<input type=submit value="アップロード">
 		</form>
 	</div>
