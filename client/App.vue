@@ -24,14 +24,16 @@ header > a {
 }
 
 .wrapper > div {
-	flex: 1 1 0;
+	flex-grow: 1;
 	display: flex;
 }
 nav {
 	border-right: 1px solid gray;
+	box-sizing: border-box;
 	margin: .5em 0;
 	padding: 0 1em;
 	width: 15em;
+	min-width: 10em;
 }
 ul {
 	padding-left: 1em;
@@ -45,7 +47,6 @@ ul {
 .content-area > div {
 	flex: 1 1 0;
 	padding: 1em;
-	overflow: auto;
 }
 footer {
 	text-align: right;
