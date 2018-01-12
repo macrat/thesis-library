@@ -101,69 +101,41 @@ class Database {
 	}
 
 	put(thesis) {
-		/*  Didn't work transaction.upsert. Won't call both of then and catch.
 		const transaction = datastore.transaction();
 
-		const thesisText = thesis.getText();
+		return thesis.getText().then(thesisText => {
+			return transaction.run()
+				.then(() => transaction.get([
+					datastore.key(['index', 'overview']),
+					datastore.key(['index', 'text']),
+				]))
+				.then(results => {
+					const overview = new Index(results[0][0]);
+					const text = new Index(results[0][1]);
 
-		return transaction.run()
-			.then(() => transaction.get([
-				datastore.key(['index', 'overview']),
-				datastore.key(['index', 'text']),
-			]))
-			.then(results => {
-				const overview = new Index(results[0][0]);
-				const text = new Index(results[0][1]);
+					overview.append(thesis, thesis.overview);
+					text.append(thesis, thesisText);
 
-				overview.append(thesis, thesis.overview);
-				text.append(thesis, thesisText);
-
-				return transaction.upsert([
-					{
-						key: datastore.key(['index', 'overview']),
-						data: overview.asObject(),
-					},
-					{
-						key: datastore.key(['index', 'text']),
-						data: text.asObject(),
-					},
-					thesis.asTask(),
-				]);
-			})
-			.then(() => {
-				return transaction.commit();
-			})
-			.catch(err => {
-				transaction.rollback();
-				return Promise.reject(err);
-			});
-		*/
-
-		const thesisText = thesis.getText();
-
-		return datastore.get([
-				datastore.key(['index', 'overview']),
-				datastore.key(['index', 'text']),
-			])
-			.then(results => {
-				const overview = new Index(results[0][0]);
-				const text = new Index(results[0][1]);
-
-				overview.append(thesis, thesis.overview);
-				text.append(thesis, thesisText);
-
-				return datastore.upsert([
-					{
-						key: datastore.key(['index', 'overview']),
-						data: overview.asObject(),
-					},
-					{
-						key: datastore.key(['index', 'text']),
-						data: text.asObject(),
-					},
-					thesis.asTask(),
-				]);
-			})
+					return transaction.save([
+						{
+							key: datastore.key(['index', 'overview']),
+							data: overview.asObject(),
+						},
+						{
+							key: datastore.key(['index', 'text']),
+							data: text.asObject(),
+						},
+						thesis.asTask(),
+					]);
+				})
+				.then(() => {
+					return transaction.commit();
+				})
+				.catch(err => {
+					transaction.rollback();
+					return Promise.reject(err);
+				});
+		});
 	}
 
 	getOverviewIndex() {
