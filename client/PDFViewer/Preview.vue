@@ -135,6 +135,7 @@ export default {
 							url: this.src,
 							page: this.page,
 							pagesNum: this.pagesNum,
+							viewport: this.viewport,
 						});
 
 						return page.getTextContent()

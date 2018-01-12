@@ -46,22 +46,28 @@
 		<div class="pdf-viewer--button pdf-viewer--next" v-if=loaded @click="page++"><span>&gt;</span></div>
 
 		<pdf-preview
+			:style=viewport
 			:src=src
 			:page.sync=page
 			:scale=scale
+			@rendered="viewport = $event.viewport"
 			@loaded="loaded = true"
 			@update:content=updated />
 	</div>
 </template>
 
 <script>
-import Preview from './Preview';
+import Loading from './Loading';
 
 
 export default {
 	props: ['src', 'scale'],
 	components: {
-		'pdf-preview': Preview,
+		'pdf-preview': () => ({
+			component: require.ensure([], require => require('./Preview'), '/pdf-preview'),
+			loading: Loading,
+			delay: 100,
+		}),
 	},
 	watch: {
 		src() {
@@ -72,6 +78,7 @@ export default {
 		return {
 			page: 1,
 			loaded: false,
+			viewport: {width: 595.28 * (this.scale || 1.0), height: 841.89 * (this.scale || 1.0)},
 		};
 	},
 	methods: {
