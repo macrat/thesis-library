@@ -159,8 +159,6 @@ export default {
 						let lastX = 0;
 						content.items.forEach(x => {
 							if (Math.abs(lastY - x.transform[5]) > 0.1) {
-								lastY = x.transform[5];
-								lastX = x.transform[4] + x.width;
 								lines.push(x.str);
 							} else {
 								if (Math.abs(lastX - x.transform[4]) > 0.5) {
@@ -169,6 +167,8 @@ export default {
 
 								lines[lines.length - 1] += x.str;
 							}
+							lastY = x.transform[5];
+							lastX = x.transform[4] + x.width;
 						});
 						this.$emit('update:content', {
 							items: content.items,

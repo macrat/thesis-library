@@ -1,6 +1,7 @@
 const Datastore = require('@google-cloud/datastore');
-
 const datastore = Datastore();
+
+const pdf = require('./pdf');
 
 
 function makeKey(year, author, title) {
@@ -55,7 +56,7 @@ class Thesis {
 	}
 
 	getText() {
-		return '';  // TODO
+		return pdf.toText(this.rawPDF);
 	}
 }
 
