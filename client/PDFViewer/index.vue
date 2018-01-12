@@ -49,6 +49,7 @@
 			:src=src
 			:page.sync=page
 			:scale=scale
+			:selectable=selectable
 			@rendered="viewport = $event.viewport"
 			@loaded="loaded = true"
 			@update:content=updated />
@@ -60,7 +61,7 @@ import Loading from './Loading';
 
 
 export default {
-	props: ['src', 'scale'],
+	props: ['src', 'scale', 'selectable'],
 	components: {
 		'pdf-preview': () => ({
 			component: require.ensure([], require => require('./Preview'), '/pdf-preview'),

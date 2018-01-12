@@ -22,7 +22,11 @@ class Thesis {
 		this.title = obj.title;
 		this.overview = obj.overview;
 		this.memo = obj.memo || '';
-		this.pdf = obj.pdf || new Buffer(obj.rawPDF).toString();
+		this.pdf = obj.pdf;
+
+		if (!this.pdf && obj.rawPDF && typeof obj.rawPDF.toString === 'function') {
+			this.pdf = obj.rawPDF.toString();
+		}
 
 		if (!this.year) throw 'missing year';
 		if (!this.degree) throw 'missing degree';

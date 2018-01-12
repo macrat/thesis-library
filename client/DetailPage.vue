@@ -7,6 +7,7 @@
 		<hr>
 		<pdf-viewer
 			src="/test.pdf"
+			:selectable=true
 			@update:content="updated" />
 	</div>
 </template>

@@ -35,7 +35,7 @@
 <template>
 	<div class=pdf-viewer--preview>
 		<canvas :width=viewport.width :height=viewport.height class=image-layer />
-		<div class=text-layer />
+		<div class=text-layer v-if=selectable />
 	</div>
 </template>
 
@@ -51,7 +51,7 @@ PDFJS.workerSrc = "/worker.js"
 
 
 export default {
-	props: ['page', 'src', 'scale'],
+	props: ['page', 'src', 'scale', 'selectable'],
 	data() {
 		return {
 			pagesNum: 0,
@@ -61,7 +61,7 @@ export default {
 		};
 	},
 	watch: {
-		url() {
+		src() {
 			this.load();
 		},
 		page(val) {
@@ -90,6 +90,11 @@ export default {
 	},
 	methods: {
 		load() {
+			if (this.src === null) {
+				this.clearCanvas();
+				return;
+			}
+
 			PDFJS.getDocument(this.src)
 				.then(pdf => {
 					this.pdfData = pdf;
@@ -142,7 +147,11 @@ export default {
 							viewport: this.viewport,
 						});
 
-						return page.getTextContent()
+						if (this.selectable) {
+							return page.getTextContent()
+						} else {
+							return null;
+						}
 					})
 					.then(content => {
 						this.textLayer.innerHTML = '';
@@ -153,28 +162,6 @@ export default {
 						});
 						textLayer.setTextContent(content);
 						textLayer.render();
-
-						let lines = [];
-						let lastY = 0;
-						let lastX = 0;
-						content.items.forEach(x => {
-							if (Math.abs(lastY - x.transform[5]) > 0.1) {
-								lines.push(x.str);
-							} else {
-								if (Math.abs(lastX - x.transform[4]) > 0.5) {
-									lines[lines.length - 1] += ' ';
-								}
-
-								lines[lines.length - 1] += x.str;
-							}
-							lastY = x.transform[5];
-							lastX = x.transform[4] + x.width;
-						});
-						this.$emit('update:content', {
-							items: content.items,
-							styles: content.styles,
-							text: lines.join('\n'),
-						});
 					})
 					.catch(err => {
 						this.$emit('failed-to-rendering', {
@@ -194,7 +181,7 @@ export default {
 			const height = this.imageLayer.height;
 
 			ctx.fillStyle = 'white';
-			ctx.fillRect(0, 0, this.imageLayer.width, this.imageLayer.height);
+			ctx.fillRect(0, 0, width, height);
 
 			ctx.strokeStyle = '#b3424a';
 			ctx.moveTo(0, 0);
@@ -207,6 +194,12 @@ export default {
 			ctx.textBaseline = 'middle';
 			ctx.textAlign = 'center';
 			ctx.fillText('読み込めませんでした', width/2, height/3, width);
+		},
+		clearCanvas() {
+			const ctx = this.imageLayer.getContext('2d');
+
+			ctx.fillStyle = 'white';
+			ctx.fillRect(0, 0, this.imageLayer.width, this.imageLayer.height);
 		},
 	},
 }
