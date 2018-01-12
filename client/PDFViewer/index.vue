@@ -41,12 +41,11 @@
 </style>
 
 <template>
-	<div class=pdf-viewer>
+	<div class=pdf-viewer :style="{ width: viewport.width + 'px', height: viewport.height + 'px' }">
 		<div class="pdf-viewer--button pdf-viewer--prev" v-if=loaded @click="page--"><span>&lt;</span></div>
 		<div class="pdf-viewer--button pdf-viewer--next" v-if=loaded @click="page++"><span>&gt;</span></div>
 
 		<pdf-preview
-			:style=viewport
 			:src=src
 			:page.sync=page
 			:scale=scale

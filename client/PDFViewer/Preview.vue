@@ -107,10 +107,14 @@ export default {
 					this.rendering();
 				})
 				.catch(err => {
-					alert('failed to read');
 					this.pagesNum = 0;
 					this.pdfData = this.pageData = null;
+					this.$emit('failed-to-load', {
+						url: this.src,
+						error: err,
+					});
 					console.error(err);
+					this.showError();
 				})
 		},
 		rendering() {
@@ -172,7 +176,37 @@ export default {
 							text: lines.join('\n'),
 						});
 					})
+					.catch(err => {
+						this.$emit('failed-to-rendering', {
+							url: this.src,
+							page: this.page,
+							pagesNum: this.pagesNum,
+							pdf: this.pdfData,
+							error: err,
+						});
+					})
 			}
+		},
+		showError() {
+			const ctx = this.imageLayer.getContext('2d');
+
+			const width = this.imageLayer.width;
+			const height = this.imageLayer.height;
+
+			ctx.fillStyle = 'white';
+			ctx.fillRect(0, 0, this.imageLayer.width, this.imageLayer.height);
+
+			ctx.strokeStyle = '#b3424a';
+			ctx.moveTo(0, 0);
+			ctx.lineTo(width, height);
+			ctx.moveTo(width, 0);
+			ctx.lineTo(0, height);
+			ctx.stroke();
+
+			ctx.fillStyle = 'black';
+			ctx.textBaseline = 'middle';
+			ctx.textAlign = 'center';
+			ctx.fillText('読み込めませんでした', width/2, height/3, width);
 		},
 	},
 }
