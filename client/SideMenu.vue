@@ -39,6 +39,9 @@ export default {
 	created() {
 		this.$client.getYearList().then(years => {
 			this.years = years.map(y => ({ num: y, thesises: null }));
+			if (this.years.length > 0) {
+				this.open(this.years[0].num);
+			}
 		});
 	},
 	methods: {
