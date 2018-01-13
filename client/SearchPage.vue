@@ -9,7 +9,7 @@ input:focus {
 .search-result {
 	padding-bottom: 1.5em;
 }
-.search-result div {
+.search-result a > div {
 	margin: .5em 1em;
 	padding: .5em 1em;
 }
@@ -23,9 +23,12 @@ a {
 	color: black;
 	text-decoration: none;
 }
-a:hover div {
-	background-color: #f9f9f9;
+a:hover > div {
+	background-color: #f0f0f0;
 }
+</style>
+
+<style>
 mark {
 	background-color: transparent;
 	color: #b3424a;
@@ -36,73 +39,63 @@ mark {
 <template>
 	<div>
 		<h1>論文を探す</h1>
-		<input type=search placeholder="検索">
+		<input type=search placeholder="検索" v-model=query>
 		<div class=search-result>
-			<a href><div>
-				<h2>論文の名前</h2>
-				<p>2017年度 学士 ほげほげ著</p>
-				<p>
-					せつめいせつめい<mark>せつめい</mark>せつめいせつめい
-					せつめいせつめい<mark>せつめい</mark>せつめいせつめい
-					せつめいせつめい<mark>せつめい</mark>せつめいせつめい
-				</p>
-			</div></a>
+			<a
+				v-for="thesis in result"
+				:href="'/' + thesis.year + '/' + encodeURIComponent(thesis.author) + '/' + encodeURIComponent(thesis.title)"
+				@click.prevent="$router.push({ path: '/' + thesis.year + '/' + encodeURIComponent(thesis.author) + '/' + encodeURIComponent(thesis.title)})"
+				><div>
 
-			<a href><div>
-				<h2>ろんぶんのなまえ</h2>
-				<p>2018年度 修士 ふがふが著</p>
-				<p>
-					せつめいぶんせつめいぶん<mark>せつめい</mark>ぶんせつめいぶんせつめいぶん
-					せつめいぶんせつめいぶん<mark>せつめい</mark>ぶんせつめいぶんせつめいぶん
-					せつめいぶんせつめいぶん<mark>せつめい</mark>ぶんせつめいぶんせつめいぶん
-				</p>
-			</div></a>
-
-			<a href><div>
-				<h2>論文の名前</h2>
-				<p>2017年度 学士 ほげほげ著</p>
-				<p>
-					せつめいせつめい<mark>せつめい</mark>せつめいせつめい
-					せつめいせつめい<mark>せつめい</mark>せつめいせつめい
-					せつめいせつめい<mark>せつめい</mark>せつめいせつめい
-				</p>
-			</div></a>
-
-			<a href><div>
-				<h2>ろんぶんのなまえ</h2>
-				<p>2018年度 修士 ふがふが著</p>
-				<p>
-					せつめいぶんせつめいぶん<mark>せつめい</mark>ぶんせつめいぶんせつめいぶん
-					せつめいぶんせつめいぶん<mark>せつめい</mark>ぶんせつめいぶんせつめいぶん
-					せつめいぶんせつめいぶん<mark>せつめい</mark>ぶんせつめいぶんせつめいぶん
-				</p>
-			</div></a>
-
-			<a href><div>
-				<h2>論文の名前</h2>
-				<p>2017年度 学士 ほげほげ著</p>
-				<p>
-					せつめいせつめい<mark>せつめい</mark>せつめいせつめい
-					せつめいせつめい<mark>せつめい</mark>せつめいせつめい
-					せつめいせつめい<mark>せつめい</mark>せつめいせつめい
-				</p>
-			</div></a>
-
-			<a href><div>
-				<h2>ろんぶんのなまえ</h2>
-				<p>2018年度 修士 ふがふが著</p>
-				<p>
-					せつめいぶんせつめいぶん<mark>せつめい</mark>ぶんせつめいぶんせつめいぶん
-					せつめいぶんせつめいぶん<mark>せつめい</mark>ぶんせつめいぶんせつめいぶん
-					せつめいぶんせつめいぶん<mark>せつめい</mark>ぶんせつめいぶんせつめいぶん
-				</p>
+				<h2 v-html=thesis.titleHTML></h2>
+				<p>{{ thesis.year }}年度 {{ {bachelor: '学士', master: '修士', doctor: '博士' }[thesis.degree] }} <span v-html=thesis.authorHTML />著</p>
+				<div v-html=thesis.html />
 			</div></a>
 		</div>
 	</div>
 </template>
 
 <script>
+import Searcher from './searcher';
+
+
 export default {
 	title: '論文を探す',
+	data() {
+		return {
+			query: '',
+			result: [],
+		};
+	},
+	mounted() {
+		this.reset();
+	},
+	computed: {
+		searcher() {
+			return new Searcher(this.$client);
+		},
+	},
+	watch: {
+		query() {
+			if (!this.query) {
+				this.reset();
+				return;
+			}
+
+			this.searcher.search(this.query).then(result => {
+				this.result = result.map(x => this.searcher.makeHTML(x));
+			}).catch(err => {
+				console.error(err);
+				this.reset();
+			});
+		},
+	},
+	methods: {
+		reset() {
+			this.$client.getOverviewIndex().then(xs => {
+				this.result = xs.map(x => this.searcher.makeHTML({ data: x, founds: [] }));
+			}).catch(console.error);
+		},
+	},
 }
 </script>

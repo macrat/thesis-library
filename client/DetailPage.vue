@@ -31,11 +31,7 @@ article {
 </template>
 
 <script>
-import APIClient from './APIClient';
 import PDFViewer from './PDFViewer';
-
-
-const client = new APIClient();
 
 
 export default {
@@ -59,7 +55,7 @@ export default {
 		};
 	},
 	created() {
-		client.getMetadata(this.thesis.year, this.thesis.author, this.thesis.title)
+		this.$client.getMetadata(this.thesis.year, this.thesis.author, this.thesis.title)
 			.then(meta => this.thesis = meta)
 			.catch(err => {
 				alert('something wrong');

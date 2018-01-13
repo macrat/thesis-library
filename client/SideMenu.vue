@@ -29,12 +29,6 @@ ul {
 </template>
 
 <script>
-import APIClient from './APIClient';
-
-
-const client = new APIClient();
-
-
 export default {
 	data() {
 		return {
@@ -43,7 +37,7 @@ export default {
 		};
 	},
 	created() {
-		client.getYearList().then(years => {
+		this.$client.getYearList().then(years => {
 			this.years = years.map(y => ({ num: y, thesises: null }));
 		});
 	},
@@ -56,7 +50,7 @@ export default {
 			this.current = yearNum;
 
 			if (year.thesises === null) {
-				client.getThesisesOfYear(yearNum).then(xs => year.thesises = xs);
+				this.$client.getThesisesOfYear(yearNum).then(xs => year.thesises = xs);
 			}
 		},
 	},

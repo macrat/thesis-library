@@ -15,7 +15,7 @@ function stringQuery(query) {
 					break;
 				}
 
-				result[result.length-1].push({ elm: elm, from: idx, to: idx + q.length });
+				result[result.length-1].push(new Marker(idx, idx + q.length, elm));
 			}
 		}
 
@@ -33,7 +33,7 @@ function regexpQuery(query) {
 
 		let found = null;
 		while (found = re.exec(text)) {
-			result.push({ elm: elm, from: found.index, to: found.index + found[0].length })
+			result.push(new Marker(found.index, found.index + found[0].length, elm));
 		}
 
 		return [result];
@@ -42,7 +42,7 @@ function regexpQuery(query) {
 
 
 function nonFilterQuery(elm, text) {
-	return [[{ elm: elm }]];
+	return [[new Marker(0, 0, elm)]];
 }
 
 
@@ -90,7 +90,7 @@ function search(list, query, options) {
 		}
 
 		return { data: x, founds: mergeFound(founds) };
-	}).filter(x => x);
+	});
 }
 
 
@@ -131,6 +131,53 @@ function mergeResults(a, b) {
 }
 
 
+function sanitize(str) {
+	return str.replace(/[&'`"<>]/g, m => ({
+		'&': '&amp;',
+		"'": '&#x27;',
+		'"': '&quot;',
+		'<': '&lt;',
+		'>': '&gt;',
+	}[m]));
+}
+
+
+function joinMarks(marks) {
+	const result = [];
+	marks.forEach(x => {
+		let found = false;
+		for (let i=0; i<result.length; i++) {
+			const y = result[i];
+			if (x.isOverwrapWith(y)) {
+				result[i] = x.merge(y);
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			result.push(x);
+		}
+	});
+	if (result.length === marks.length) {
+		return result;
+	} else {
+		return this.joinMarks(result);
+	}
+}
+
+
+function markup(text, marks) {
+	let last = 0;
+	const splitted = marks.filter(x => x.from !== x.to).sort((x, y) => x.from - y.from).map(m => {
+		const result = [text.slice(last, m.from), text.slice(m.from, m.to)];
+		last = m.to;
+		return result;
+	});
+
+	return splitted.map(x => `${sanitize(x[0])}<mark>${sanitize(x[1])}</mark>`).join('') + text.slice(last);
+}
+
+
 export const debug = {
 	stringQuery: stringQuery,
 	regexpQuery: regexpQuery,
@@ -140,7 +187,27 @@ export const debug = {
 	search: search,
 	resultIndexOf: resultIndexOf,
 	mergeResults: mergeResults,
+	sanitize: sanitize,
+	joinMarks: joinMarks,
+	markup: markup,
 };
+
+
+export class Marker {
+	constructor(from, to, elm=null) {
+		this.from = from;
+		this.to = to;
+		this.elm = elm;
+	}
+
+	isOverwrapWith(mark) {
+		return this.from <= mark.to && mark.from <= this.to;
+	}
+
+	merge(mark) {
+		return new Marker(Math.min(this.from, mark.from), Math.max(this.to, mark.to));
+	}
+}
 
 
 export default class {
@@ -165,11 +232,7 @@ export default class {
 		options = Object.assign(Object.assign({}, this.defaultOptions), options);
 
 		return this._client.getOverviewIndex().then(overviewIndex => {
-			let results = search(overviewIndex, query, options).map(x => {
-				x.data.overview = x.data.content;
-				delete x.data.content;
-				return x;
-			});
+			let results = search(overviewIndex, query, options);
 
 			if (options.overview) {
 				results = results.map(x => ({
@@ -182,12 +245,8 @@ export default class {
 				return this._client.getTextIndex().then(textIndex => {
 					return mergeResults(results, textIndex.map(x => ({
 						data: x,
-						founds: query('text', x.content),
-					})).map(x => {
-						x.data.text = x.data.content;
-						delete x.data.content;
-						return x;
-					}));
+						founds: query('text', x.text),
+					})));
 				});
 			}
 
@@ -204,5 +263,46 @@ export default class {
 				return true;
 			});
 		});
+	}
+
+	makeHTML(thesis) {
+		const titleMarks = [];
+		const authorMarks = [];
+		const overviewMarks = [];
+		const textMarks = [];
+
+		thesis.founds.forEach(xs => {
+			xs.forEach(x => {
+				if (x.elm === 'title') {
+					titleMarks.push(x);
+				}
+				if (x.elm === 'author') {
+					authorMarks.push(x);
+				}
+				if (x.elm === 'overview') {
+					overviewMarks.push(x);
+				}
+				if (x.elm === 'text') {
+					textMarks.push(x);
+				}
+			});
+		});
+
+		let html = '';
+		if (thesis.data.text && (textMarks.length > 0 || overviewMarks.length !== 0)) {
+			html = markup(thesis.data.text, textMarks);
+		} else {
+			html = markup(thesis.data.overview, overviewMarks);
+		}
+
+		return {
+			year: thesis.data.year,
+			author: thesis.data.author,
+			title: thesis.data.title,
+			degree: thesis.data.degree,
+			html: html,
+			authorHTML: markup(thesis.data.author, authorMarks),
+			titleHTML: markup(thesis.data.title, titleMarks),
+		};
 	}
 }

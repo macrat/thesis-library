@@ -79,6 +79,8 @@ footer {
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
+import APIClient from './APIClient';
+
 import SideMenu from './SideMenu';
 
 
@@ -98,6 +100,9 @@ Vue.mixin({
 		}
 	},
 });
+
+
+Vue.prototype.$client = new APIClient();
 
 
 export default {

@@ -107,7 +107,13 @@ app.get(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\./, (req, res) => {
 app.get('/api/index/overview', (req, res) => {
 	(new database.Database()).getOverviewIndex()
 		.then(index => {
-			res.status(200).json(index.asArray());
+			res.status(200).json(index.asArray().map(x => ({
+				year: x.year,
+				author: x.author,
+				title: x.title,
+				degree: x.degree,
+				overview: x.content,
+			})));
 		})
 		.catch(err => {
 			console.error(err);
@@ -118,7 +124,13 @@ app.get('/api/index/overview', (req, res) => {
 app.get('/api/index/text', (req, res) => {
 	(new database.Database()).getTextIndex()
 		.then(index => {
-			res.status(200).json(index.asArray());
+			res.status(200).json(index.asArray().map(x => ({
+				year: x.year,
+				author: x.author,
+				title: x.title,
+				degree: x.degree,
+				text: x.content,
+			})));
 		})
 		.catch(err => {
 			console.error(err);

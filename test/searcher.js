@@ -1,6 +1,6 @@
 import assert from 'power-assert';
 
-import Searcher, { debug } from '../client/searcher';
+import Searcher, { Marker, debug } from '../client/searcher';
 
 
 describe('client', () => {
@@ -12,15 +12,17 @@ describe('client', () => {
 						return Promise.resolve([
 							{
 								year: 2017,
+								degree: 'master',
 								title: 'hello',
 								author: 'world',
-								content: 'abcdef',
+								overview: 'abcdef',
 							},
 							{
 								year: 2015,
+								degree: 'bachelor',
 								title: 'world',
 								author: 'test',
-								content: 'defghi',
+								overview: 'defghi',
 							},
 						]);
 					},
@@ -28,15 +30,17 @@ describe('client', () => {
 						return Promise.resolve([
 							{
 								year: 2017,
+								degree: 'master',
 								title: 'hello',
 								author: 'world',
-								content: 'this is body',
+								text: 'this is body',
 							},
 							{
 								year: 2015,
+								degree: 'bachelor',
 								title: 'world',
 								author: 'test',
-								content: 'it is content',
+								text: 'it is content',
 							},
 						]);
 					},
@@ -51,14 +55,14 @@ describe('client', () => {
 
 				r = q('elm', 'this is hoge and fugafuga and fugahoge');
 				assert.deepStrictEqual(r, [
-					[{elm: 'elm', from: 8, to: 12}, {elm: 'elm', from: 34, to: 38}],
-					[{elm: 'elm', from: 17, to: 25}],
+					[new Marker(8, 12, 'elm'), new Marker(34, 38, 'elm')],
+					[new Marker(17, 25, 'elm')],
 				]);
 
 				r = q('test', 'a fugafuga!');
 				assert.deepStrictEqual(r, [
 					[],
-					[{elm: 'test', from: 2, to: 10}],
+					[new Marker(2, 10, 'test')],
 				]);
 			});
 
@@ -68,7 +72,7 @@ describe('client', () => {
 
 				r = q('elm', 'abcdef aca');
 				assert.deepStrictEqual(r, [
-					[{elm: 'elm', from: 0, to: 3}, {elm: 'elm', from: 7, to: 9}],
+					[new Marker(0, 3, 'elm'), new Marker(7, 9, 'elm')],
 				]);
 
 				r = q('test', 'asdfghj');
@@ -79,36 +83,36 @@ describe('client', () => {
 
 			it('queryFunc', () => {
 				const re = debug.queryFunc('/a/');
-				assert.deepStrictEqual(re('re', '_/a/b/c/'), [[{elm: 're', from: 2, to: 3}]]);
+				assert.deepStrictEqual(re('re', '_/a/b/c/'), [[new Marker(2, 3, 're')]]);
 
 				const str = debug.queryFunc('_/a/');
-				assert.deepStrictEqual(str('str', '_/a/b/c/'), [[{elm: 'str', from: 0, to: 4}]]);
+				assert.deepStrictEqual(str('str', '_/a/b/c/'), [[new Marker(0, 4, 'str')]]);
 
 				const empty = debug.queryFunc('  ');
-				assert.deepStrictEqual(empty('empty', '_/a/b/c/'), [[{elm: 'empty' }]]);
+				assert.deepStrictEqual(empty('empty', '_/a/b/c/'), [[new Marker(0, 0, 'empty')]]);
 			});
 
 			it('mergeFound', () => {
 				assert.deepStrictEqual(debug.mergeFound([
-					[[{elm: 'hoge', from: 0, to: 1}]],
-					[[{elm: 'fuga', from: 1, to: 2}]],
-				]), [[{elm: 'hoge', from: 0, to: 1}, {elm: 'fuga', from: 1, to: 2}]]);
+					[[new Marker(0, 1, 'hoge')]],
+					[[new Marker(1, 2, 'fuga')]],
+				]), [[new Marker(0, 1, 'hoge'), new Marker(1, 2, 'fuga')]]);
 
 				assert.deepStrictEqual(debug.mergeFound([
-					[[{elm: 'hoge', from: 0, to: 1}, {elm: 'foo', from: 2, to: 3}], [], []],
-					[[{elm: 'fuga', from: 1, to: 2}], [{elm: 'bar', from: 3, to: 4}], []],
+					[[new Marker(0, 1, 'hoge'), new Marker(2, 3, 'foo')], [], []],
+					[[new Marker(1, 2, 'fuga')], [new Marker(3, 4, 'bar')], []],
 				]), [
-					[{elm: 'hoge', from: 0, to: 1}, {elm: 'foo', from: 2, to: 3}, {elm: 'fuga', from: 1, to: 2}],
-					[{elm: 'bar', from: 3, to: 4}],
+					[new Marker(0, 1, 'hoge'), new Marker(2, 3, 'foo'), new Marker(1, 2, 'fuga')],
+					[new Marker(3, 4, 'bar')],
 					[]
 				]);
 			});
 
 			it('check', () => {
-				assert.equal(debug.check([[]]), false);
-				assert.equal(debug.check([[], [], []]), false);
-				assert.equal(debug.check([[], [{elm: 'hoge', from: 0, to: 2}], [{elm: 'hoge', from: 1, to: 3}]]), false);
-				assert.equal(debug.check([[{elm: 'hoge', from: 0, to: 2}], [{elm: 'hoge', from: 1, to: 3}]]), true);
+				assert.strictEqual(debug.check([[]]), false);
+				assert.strictEqual(debug.check([[], [], []]), false);
+				assert.strictEqual(debug.check([[], [new Marker(0, 2, 'hoge')], [new Marker(1, 3, 'hoge')]]), false);
+				assert.strictEqual(debug.check([[new Marker(0, 2, 'hoge')], [new Marker(1, 3, 'hoge')]]), true);
 			});
 
 			it('resultIndexOf', () => {
@@ -147,9 +151,9 @@ describe('client', () => {
 					},
 				];
 
-				assert.equal(debug.resultIndexOf(xs, xs[0]), 0);
-				assert.equal(debug.resultIndexOf(xs, xs[2]), 2);
-				assert.equal(debug.resultIndexOf(xs, { data: { year: 0, author: 'none', title: 'not found' } }), -1);
+				assert.strictEqual(debug.resultIndexOf(xs, xs[0]), 0);
+				assert.strictEqual(debug.resultIndexOf(xs, xs[2]), 2);
+				assert.strictEqual(debug.resultIndexOf(xs, { data: { year: 0, author: 'none', title: 'not found' } }), -1);
 			});
 
 			it('mergeResults', () => {
@@ -161,7 +165,7 @@ describe('client', () => {
 							title: 'foo',
 							overview: 'test',
 						},
-						founds: [[{elm: 'test'}]],
+						founds: [[new Marker(0, 0, 'test')]],
 					},
 					{
 						data: {
@@ -170,7 +174,7 @@ describe('client', () => {
 							title: 'bar',
 							overview: 'aaa',
 						},
-						founds: [[{elm: 'foo'}]],
+						founds: [[new Marker(0, 0, 'foo')]],
 					},
 				], [
 					{
@@ -180,7 +184,7 @@ describe('client', () => {
 							title: 'bar',
 							text: 'bbb',
 						},
-						founds: [[{elm: 'bar'}]],
+						founds: [[new Marker(0, 0, 'bar')]],
 					},
 					{
 						data: {
@@ -189,7 +193,7 @@ describe('client', () => {
 							title: 'foo',
 							text: 'abc',
 						},
-						founds: [[{elm: 'hoge'}]],
+						founds: [[new Marker(0, 0, 'hoge')]],
 					},
 					{
 						data: {
@@ -198,7 +202,7 @@ describe('client', () => {
 							title: 'asd',
 							text: 'only here',
 						},
-						founds: [[{elm: 'hoge'}]],
+						founds: [[new Marker(0, 0, 'hoge')]],
 					},
 				]), [
 					{
@@ -209,7 +213,7 @@ describe('client', () => {
 							overview: 'test',
 							text: 'abc',
 						},
-						founds: [[{elm: 'test'}, {elm: 'hoge'}]],
+						founds: [[new Marker(0, 0, 'test'), new Marker(0, 0, 'hoge')]],
 					},
 					{
 						data: {
@@ -219,7 +223,7 @@ describe('client', () => {
 							overview: 'aaa',
 							text: 'bbb',
 						},
-						founds: [[{elm: 'foo'}, {elm: 'bar'}]],
+						founds: [[new Marker(0, 0, 'foo'), new Marker(0, 0, 'bar')]],
 					},
 					{
 						data: {
@@ -228,7 +232,7 @@ describe('client', () => {
 							title: 'asd',
 							text: 'only here',
 						},
-						founds: [[{elm: 'hoge'}]],
+						founds: [[new Marker(0, 0, 'hoge')]],
 					},
 				]);
 
@@ -240,7 +244,7 @@ describe('client', () => {
 							title: 'foo',
 							overview: 'test',
 						},
-						founds: [[{elm: 'test'}]],
+						founds: [[new Marker(0, 0, 'test')]],
 					},
 					{
 						data: {
@@ -249,7 +253,7 @@ describe('client', () => {
 							title: 'bar',
 							overview: 'aaa',
 						},
-						founds: [[{elm: 'foo'}]],
+						founds: [[new Marker(0, 0, 'foo')]],
 					},
 					{
 						data: {
@@ -258,7 +262,7 @@ describe('client', () => {
 							title: 'asd',
 							text: 'only here',
 						},
-						founds: [[{elm: 'hoge'}]],
+						founds: [[new Marker(0, 0, 'hoge')]],
 					},
 				], [
 					{
@@ -268,7 +272,7 @@ describe('client', () => {
 							title: 'bar',
 							text: 'bbb',
 						},
-						founds: [[{elm: 'bar'}]],
+						founds: [[new Marker(0, 0, 'bar')]],
 					},
 					{
 						data: {
@@ -277,7 +281,7 @@ describe('client', () => {
 							title: 'foo',
 							text: 'abc',
 						},
-						founds: [[{elm: 'hoge'}]],
+						founds: [[new Marker(0, 0, 'hoge')]],
 					},
 				]), [
 					{
@@ -288,7 +292,7 @@ describe('client', () => {
 							overview: 'test',
 							text: 'abc',
 						},
-						founds: [[{elm: 'test'}, {elm: 'hoge'}]],
+						founds: [[new Marker(0, 0, 'test'), new Marker(0, 0, 'hoge')]],
 					},
 					{
 						data: {
@@ -298,7 +302,7 @@ describe('client', () => {
 							overview: 'aaa',
 							text: 'bbb',
 						},
-						founds: [[{elm: 'foo'}, {elm: 'bar'}]],
+						founds: [[new Marker(0, 0, 'foo'), new Marker(0, 0, 'bar')]],
 					},
 					{
 						data: {
@@ -307,7 +311,7 @@ describe('client', () => {
 							title: 'asd',
 							text: 'only here',
 						},
-						founds: [[{elm: 'hoge'}]],
+						founds: [[new Marker(0, 0, 'hoge')]],
 					},
 				]);
 			});
@@ -321,10 +325,11 @@ describe('client', () => {
 						data: {
 							year: 2015,
 							title: 'world',
+							degree: 'bachelor',
 							author: 'test',
 							overview: 'defghi',
 						},
-						founds: [[{elm: 'title', from: 0, to: 5}]],
+						founds: [[new Marker(0, 5, 'title')]],
 					},
 				]);
 
@@ -336,10 +341,11 @@ describe('client', () => {
 						data: {
 							year: 2017,
 							title: 'hello',
+							degree: 'master',
 							author: 'world',
 							overview: 'abcdef',
 						},
-						founds: [[{elm: 'author', from: 0, to: 5}]],
+						founds: [[new Marker(0, 5, 'author')]],
 					},
 				]);
 			});
@@ -350,10 +356,11 @@ describe('client', () => {
 						data: {
 							year: 2017,
 							title: 'hello',
+							degree: 'master',
 							author: 'world',
 							overview: 'abcdef',
 						},
-						founds: [[{elm: 'overview', from: 0, to: 3}]],
+						founds: [[new Marker(0, 3, 'overview')]],
 					},
 				]);
 
@@ -362,19 +369,21 @@ describe('client', () => {
 						data: {
 							year: 2017,
 							title: 'hello',
+							degree: 'master',
 							author: 'world',
 							overview: 'abcdef',
 						},
-						founds: [[{elm: 'overview', from: 3, to: 6}]],
+						founds: [[new Marker(3, 6, 'overview')]],
 					},
 					{
 						data: {
 							year: 2015,
 							title: 'world',
+							degree: 'bachelor',
 							author: 'test',
 							overview: 'defghi',
 						},
-						founds: [[{elm: 'overview', from: 0, to: 3}]],
+						founds: [[new Marker(0, 3, 'overview')]],
 					},
 				]);
 			});
@@ -385,11 +394,12 @@ describe('client', () => {
 						data: {
 							year: 2017,
 							title: 'hello',
+							degree: 'master',
 							author: 'world',
 							text: 'this is body',
 							overview: 'abcdef',
 						},
-						founds: [[{elm: 'text', from: 8, to: 12}]],
+						founds: [[new Marker(8, 12, 'text')]],
 					},
 				]);
 
@@ -398,21 +408,23 @@ describe('client', () => {
 						data: {
 							year: 2017,
 							title: 'hello',
+							degree: 'master',
 							author: 'world',
 							text: 'this is body',
 							overview: 'abcdef',
 						},
-						founds: [[{elm: 'text', from: 2, to: 4}, {elm: 'text', from: 5, to: 7}]],
+						founds: [[new Marker(2, 4, 'text'), new Marker(5, 7, 'text')]],
 					},
 					{
 						data: {
 							year: 2015,
 							title: 'world',
+							degree: 'bachelor',
 							author: 'test',
 							text: 'it is content',
 							overview: 'defghi',
 						},
-						founds: [[{elm: 'text', from: 3, to: 5}]],
+						founds: [[new Marker(3, 5, 'text')]],
 					},
 				]);
 			});
@@ -423,11 +435,12 @@ describe('client', () => {
 						data: {
 							year: 2017,
 							title: 'hello',
+							degree: 'master',
 							author: 'world',
 							text: 'this is body',
 							overview: 'abcdef',
 						},
-						founds: [[{elm: 'text', from: 8, to: 12}], [{elm: 'overview', from: 0, to: 3}]],
+						founds: [[new Marker(8, 12, 'text')], [new Marker(0, 3, 'overview')]],
 					},
 				]);
 
@@ -436,23 +449,89 @@ describe('client', () => {
 						data: {
 							year: 2017,
 							title: 'hello',
+							degree: 'master',
 							author: 'world',
 							text: 'this is body',
 							overview: 'abcdef',
 						},
-						founds: [[{elm: 'text', from: 2, to: 4}, {elm: 'text', from: 5, to: 7}], [{elm: 'overview', from: 3, to: 6}]],
+						founds: [[new Marker(2, 4, 'text'), new Marker(5, 7, 'text')], [new Marker(3, 6, 'overview')]],
 					},
 					{
 						data: {
 							year: 2015,
 							title: 'world',
+							degree: 'bachelor',
 							author: 'test',
 							text: 'it is content',
 							overview: 'defghi',
 						},
-						founds: [[{elm: 'text', from: 3, to: 5}], [{elm: 'overview', from: 0, to: 3}]],
+						founds: [[new Marker(3, 5, 'text')], [new Marker(0, 3, 'overview')]],
 					},
 				]);
+			});
+
+			it('sanitize', () => {
+				assert.strictEqual(debug.sanitize('hello&world<this>is\'test"'), 'hello&amp;world&lt;this&gt;is&#x27;test&quot;');
+			});
+
+			it('joinMarks', () => {
+				assert.deepStrictEqual(debug.joinMarks([
+					new Marker(0, 10),
+					new Marker(5, 12),
+					new Marker(20, 25),
+				]), [
+					new Marker(0, 12),
+					new Marker(20, 25),
+				]);
+
+				assert.deepStrictEqual(debug.joinMarks([
+					new Marker(1, 10),
+					new Marker(15, 25),
+					new Marker(5, 20),
+				]), [
+					new Marker(1, 25),
+				]);
+			});
+
+			it('markup', () => {
+				assert.strictEqual(
+					debug.markup('hello beautiful world', []),
+					'hello beautiful world',
+				);
+
+				assert.strictEqual(
+					debug.markup('hello beautiful world', [new Marker(6, 15)]),
+					'hello <mark>beautiful</mark> world',
+				);
+
+				assert.strictEqual(
+					debug.markup('hello beautiful world', [new Marker(0, 0, 'test'), new Marker(6, 15), new Marker(0, 0, 'test')]),
+					'hello <mark>beautiful</mark> world',
+				);
+
+				assert.strictEqual(
+					debug.markup('hello <b>beautiful</b> world', [new Marker(6, 22)]),
+					'hello <mark>&lt;b&gt;beautiful&lt;/b&gt;</mark> world',
+				);
+				assert.strictEqual(
+					debug.markup('hello beautiful world', [new Marker(6, 15), new Marker(0, 5), new Marker(16, 22)]),
+					'<mark>hello</mark> <mark>beautiful</mark> <mark>world</mark>',
+				);
+			});
+
+			it('makeHTML',  async function() {
+				assert.deepStrictEqual(this.searcher.makeHTML({
+					data: (await this.client.getOverviewIndex())[0],
+					founds: [[new Marker(0, 2, 'title'), new Marker(3, 5, 'author'), new Marker(2, 4, 'overview')]],
+				}), {
+					year: 2017,
+					degree: 'master',
+					author: 'world',
+					title: 'hello',
+					authorHTML: 'wor<mark>ld</mark>',
+					titleHTML: '<mark>he</mark>llo',
+					html: 'ab<mark>cd</mark>ef',
+				});
 			});
 		});
 	});
