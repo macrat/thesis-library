@@ -510,12 +510,18 @@ describe('client', () => {
 				);
 
 				assert.strictEqual(
-					debug.markup('hello <b>beautiful</b> world', [new Marker(6, 22)]),
-					'hello <mark>&lt;b&gt;beautiful&lt;/b&gt;</mark> world',
+					debug.markup('<u>hello</u> <b>beautiful</b> <i>world</i>', [new Marker(13, 29)]),
+					'&lt;u&gt;hello&lt;/u&gt; <mark>&lt;b&gt;beautiful&lt;/b&gt;</mark> &lt;i&gt;world&lt;/i&gt;',
 				);
+
 				assert.strictEqual(
 					debug.markup('hello beautiful world', [new Marker(6, 15), new Marker(0, 5), new Marker(16, 22)]),
 					'<mark>hello</mark> <mark>beautiful</mark> <mark>world</mark>',
+				);
+
+				assert.strictEqual(
+					debug.markup('a'.repeat(1000) + ' hello ' + 'b'.repeat(1000), [new Marker(1001, 1006)]),
+					'a'.repeat(250 - 3) + ' <mark>hello</mark> ' + 'b'.repeat(250 - 3),
 				);
 			});
 

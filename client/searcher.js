@@ -167,14 +167,25 @@ function joinMarks(marks) {
 
 
 function markup(text, marks) {
+	if (marks.length == 0) {
+		return sanitize(text);
+	}
+
+	marks = marks.filter(x => x.from !== x.to).sort((x, y) => x.from - y.from);
+
+	const offset = Math.max(0, marks[0].from - 251 + Math.round(marks[0].length/2));
+	marks = marks.filter(x => offset < x.to && x.from < offset + 500);
+
 	let last = 0;
-	const splitted = marks.filter(x => x.from !== x.to).sort((x, y) => x.from - y.from).map(m => {
+	const splitted = marks.map(m => {
 		const result = [text.slice(last, m.from), text.slice(m.from, m.to)];
 		last = m.to;
 		return result;
 	});
 
-	return splitted.map(x => `${sanitize(x[0])}<mark>${sanitize(x[1])}</mark>`).join('') + text.slice(last);
+	splitted[0][0] = splitted[0][0].slice(offset);
+
+	return (splitted.map(x => `${sanitize(x[0])}<mark>${sanitize(x[1])}</mark>`).join('') + sanitize(text.slice(last, offset + 501)));
 }
 
 
@@ -202,6 +213,10 @@ export class Marker {
 
 	isOverwrapWith(mark) {
 		return this.from <= mark.to && mark.from <= this.to;
+	}
+
+	get length() {
+		return this.to - this.from + 1;
 	}
 
 	merge(mark) {
