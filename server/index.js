@@ -17,10 +17,6 @@ app.use(require('body-parser').json({ limit: '100mb' }));
 
 app.use(express.static(path.join(__dirname, '../build/')));
 
-app.use(/^\/(|detail|search|upload|20[0-9][0-9]\/[^\/]+\/.+)$/, (req, res) => {
-	res.sendFile(path.join(__dirname, '../build/index.html'));
-});
-
 app.post('/api/post', (req, res) => {
 	if (!req.body.pdf) {
 		res.status(400).json({ error: 'missing pdf' });
@@ -55,7 +51,12 @@ app.get(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/(.+)\/metadata$/, (req, res) 
 	db.get(Number(req.params[0]), decodeURIComponent(req.params[1]), decodeURIComponent(req.params[2]))
 		.then(thesis => res.status(200).json(thesis.asSendableJSON()))
 		.catch(err => {
-			console.error(err);
+			if (err.code === 404) {
+				res.status(404).json({ error: 'not found' });
+			} else {
+				console.error(err);
+				res.status(500).json({ error: 'something wrong' });
+			}
 		})
 });
 
@@ -135,4 +136,8 @@ app.get('/api/index/text', (req, res) => {
 			console.error(err);
 			res.status(500).json({ error: 'something wrong' });
 		})
+});
+
+app.get(/.*/, (req, res) => {
+	res.sendFile(path.join(__dirname, '../build/index.html'));
 });

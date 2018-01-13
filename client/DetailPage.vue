@@ -5,38 +5,52 @@ article {
 	margin-bottom: 1em;
 }
 
+h2 {
+	margin-left: .5em;
+	font-size: 120%;
+}
+
 .link-disabled {
 	color: gray;
 }
 </style>
 
 <template>
-	<div>
+	<div v-if="error === null">
 		<h1>{{ thesis.title }}</h1>
-		{{ thesis.year }}年度 {{ {bachelor: '学士', master: '修士', doctor: '博士' }[thesis.degree] }} {{ thesis.author }}著<br>
+		{{ thesis.year }}年度 {{ {bachelor: '学士', master: '修士', doctor: '博士' }[thesis.degree] }} {{ thesis.author }}<br>
 		<article>
 			<h2>概要</h2>
 			{{ thesis.overview }}
 		</article>
 
-		<a :href=thesis.pdf :class="{'link-disabled': !thesis.pdf}" @click="!thesis.pdf ? $event.prevent() : null" target=_blank>PDFを開く</a>
-		<a href :class="{'link-disabled': !thesis.pdf}" @click="!thesis.pdf ? $event.prevent() : null">編集</a>
-
 		<article v-if=thesis.memo>
 			<h2>メモ</h2>
 			{{ thesis.memo }}
 		</article>
+
+		<a :href=thesis.pdf :class="{'link-disabled': !thesis.pdf}" @click="!thesis.pdf ? $event.prevent() : null" target=_blank>PDFを開く</a>
+		<a href :class="{'link-disabled': !thesis.pdf}" @click="!thesis.pdf ? $event.prevent() : null">編集</a>
 		<pdf-viewer :src=thesis.pdf :selectable=true />
+	</div>
+	<not-found v-else-if="error === 'notfound'" />
+	<div v-else>
+		<h1>読み込めませんでした</h1>
+		何か問題が起きているようです。<br>
+		しばらく待っても解決しないようなら、管理者にお問い合わせください。<br>
 	</div>
 </template>
 
 <script>
 import PDFViewer from './PDFViewer';
 
+import NotFound from './NotFound';
+
 
 export default {
 	components: {
 		'pdf-viewer': PDFViewer,
+		'not-found': NotFound,
 	},
 	data() {
 		return {
@@ -49,7 +63,8 @@ export default {
 				overview: '',
 				memo: '',
 				pdf: null,
-			}
+			},
+			error: null,
 		};
 	},
 	watch: {
@@ -63,11 +78,16 @@ export default {
 	},
 	methods: {
 		load() {
+			this.error = null;
+
 			this.$client.getMetadata(this.$route.params.year, this.$route.params.author, this.$route.params.title)
 				.then(meta => this.thesis = meta)
 				.catch(err => {
-					alert('something wrong');
-					console.error(err);
+					if (err.response.status === 404) {
+						this.error = 'notfound';
+					} else {
+						this.error = 'unknown';
+					}
 				})
 		},
 	},

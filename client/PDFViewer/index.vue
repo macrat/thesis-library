@@ -46,6 +46,7 @@
 		<div class="pdf-viewer--button pdf-viewer--next" v-if=loaded @click="page++"><span>&gt;</span></div>
 
 		<pdf-preview
+			ref=preview
 			:src=src
 			:page.sync=page
 			:scale=scale
@@ -79,6 +80,9 @@ export default {
 			loaded: false,
 			viewport: {width: 595.28 * (this.scale || 1.0), height: 841.89 * (this.scale || 1.0)},
 		};
+	},
+	showError() {
+		this.$refs.preview.showError();
 	},
 };
 </script>

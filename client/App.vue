@@ -82,6 +82,7 @@ import VueRouter from 'vue-router';
 import APIClient from './APIClient';
 
 import SideMenu from './SideMenu';
+import NotFound from './NotFound';
 
 
 VueRouter.install(Vue);
@@ -137,6 +138,10 @@ export default {
 			{
 				path: '/:year/:author/:title*',
 				component: () => require.ensure([], require => require('./DetailPage'), '/detail'),
+			},
+			{
+				path: '*',
+				component: NotFound,
 			},
 		],
 	})
