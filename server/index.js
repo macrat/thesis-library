@@ -62,7 +62,6 @@ app.get(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/(.+)\/metadata$/, (req, res) 
 app.get('/api/thesis/', (req, res) => {
 	(new database.Database()).getOverviewIndex()
 		.then(index => {
-			console.log(index.asArray()[0])
 			const result = index.asArray().map(x => x.year).filter((x, i, xs) => xs.indexOf(x) === i);
 			res.status(200).json(result);
 		})
