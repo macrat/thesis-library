@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import axios from 'axios';
 
 
@@ -11,6 +12,8 @@ export default class {
 
 		this._overviewIndex = null;
 		this._textIndex = null;
+
+		this._event = new EventEmitter();
 	}
 
 	getMetadata(year, author, title) {
@@ -53,5 +56,14 @@ export default class {
 	clearCache() {
 		this._overviewIndex = null;
 		this._textIndex = null;
+		this._event.emit('clear-cache');
+	}
+
+	on(name, fun) {
+		this._event.addListener(name, fun);
+	}
+
+	off(name, fun) {
+		this._event.removeListener(name, fun);
 	}
 }

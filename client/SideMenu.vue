@@ -44,6 +44,12 @@ export default {
 			}
 		});
 	},
+	mounted() {
+		this.$client.on('clear-cache', this.clearCache);
+	},
+	destroy() {
+		this.$client.off('clear-cache', this.clearCache);
+	},
 	methods: {
 		open(yearNum) {
 			const year = this.years.filter(x => x.num === yearNum)[0];
@@ -55,6 +61,12 @@ export default {
 			if (year.thesises === null) {
 				this.$client.getThesisesOfYear(yearNum).then(xs => year.thesises = xs);
 			}
+		},
+		clearCache() {
+			this.$client.getYearList().then(years => {
+				this.years = years.map(y => ({ num: y, thesises: null }));
+				this.open(this.current);
+			});
 		},
 	},
 }
