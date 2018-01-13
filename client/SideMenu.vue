@@ -8,17 +8,22 @@ ul {
 	color: black;
 	text-decoration: none;
 }
+
+.side-menu--button--active {
+	color: #b3424a;
+}
 </style>
 
 <template>
 	<nav>
 		<ul>
 			<li v-for="year in years">
-				<span class=side-menu--button @click="open(year.num)">{{ year.num }}年度</span>
+				<span class=side-menu--button @click="openClose(year.num)">{{ year.num }}年度</span>
 				<ul v-if="year.num === current">
 					<li v-for="thesis in year.thesises">
 						<a
 							class=side-menu--button
+							:class="{ 'side-menu--button--active': thesis.year === detailShown.year && thesis.author === detailShown.author && thesis.title === detailShown.title }"
 							:href="'/' + year.num + '/' + encodeURIComponent(thesis.author) + '/' + encodeURIComponent(thesis.title)"
 							@click.prevent="$router.push({ path: '/' + year.num + '/' + encodeURIComponent(thesis.author) + '/' + encodeURIComponent(thesis.title) })">{{ thesis.title }}</a>
 					</li>
@@ -34,7 +39,19 @@ export default {
 		return {
 			current: null,
 			years: [],
+			detailShown: {
+				year: Number(this.$route.params.year),
+				author: this.$route.params.author,
+				title: this.$route.params.title,
+			},
 		};
+	},
+	watch: {
+		'$route': function() {
+			this.detailShown.year = Number(this.$route.params.year);
+			this.detailShown.author = this.$route.params.author;
+			this.detailShown.title = this.$route.params.title;
+		}
 	},
 	created() {
 		this.$client.getYearList().then(years => {
@@ -60,6 +77,13 @@ export default {
 
 			if (year.thesises === null) {
 				this.$client.getThesisesOfYear(yearNum).then(xs => year.thesises = xs);
+			}
+		},
+		openClose(yearNum) {
+			if (this.current === yearNum) {
+				this.current = null;
+			} else {
+				this.open(yearNum);
 			}
 		},
 		clearCache() {
