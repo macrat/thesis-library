@@ -33,6 +33,10 @@ class Thesis {
 		if (!this.author) throw 'missing author';
 		if (!this.title) throw 'missing title';
 		if (!this.overview) throw 'missing overview';
+
+		if (this.degree !== 'bachelor' && this.degree !== 'master' && this.degree !== 'doctor') {
+			throw 'invalid degree';
+		}
 	}
 
 	get key() {
@@ -52,6 +56,18 @@ class Thesis {
 
 	getText() {
 		return this.getPDF().then(pdf.toText);
+	}
+
+	asSendableJSON() {
+		return {
+			year: this.year,
+			degree: this.degree,
+			author: this.author,
+			title: this.title,
+			overview: this.overview,
+			memo: this.memo,
+			pdf: `https://storage.googleapis.com/${process.env.GCLOUD_BUCKET}/${this.year}/${encodeURIComponent(this.author)}/${encodeURIComponent(this.title)}`,
+		};
 	}
 }
 
@@ -121,7 +137,7 @@ class Database {
 					},
 				});
 
-				stream.on('finish', resolve);
+				stream.on('finish', x => resolve(file.makePublic()));
 				stream.on('error', reject);
 
 				stream.end(thesis._rawPDF);
@@ -162,7 +178,7 @@ class Database {
 						},
 					});
 
-					stream.on('finish', resolve);
+					stream.on('finish', x => resolve(file.makePublic()));
 					stream.on('error', reject);
 
 					stream.end(binary);

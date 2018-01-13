@@ -51,8 +51,7 @@
 			:scale=scale
 			:selectable=selectable
 			@rendered="viewport = $event.viewport"
-			@loaded="loaded = true"
-			@update:content=updated />
+			@loaded="loaded = true" />
 	</div>
 </template>
 
@@ -80,11 +79,6 @@ export default {
 			loaded: false,
 			viewport: {width: 595.28 * (this.scale || 1.0), height: 841.89 * (this.scale || 1.0)},
 		};
-	},
-	methods: {
-		updated(content) {
-			this.$emit('update:content', content);
-		},
 	},
 };
 </script>

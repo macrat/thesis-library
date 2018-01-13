@@ -13,6 +13,42 @@
 .memo {
 	height: 5em;
 }
+
+.uploading-indicator {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.6);
+	z-index: 100;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	font-size: 200%;
+}
+.uploading-indicator > div{
+	animation: loading-animation 2s ease 0s infinite alternate;
+}
+@keyframes loading-animation {
+	0% {
+		opacity: .1;
+	}
+	80%, 100% {
+		opacity: .9;
+	}
+}
+
+.indicator-enter-active {
+	transition: opacity 1s;
+}
+.indicator-leave-active {
+	transition: opacity .5s;
+}
+.indicator-enter, .indicator-leave-to {
+	opacity: 0;
+}
 </style>
 
 <template>
@@ -47,6 +83,10 @@
 			<label>修正用パスワード（省略可）： <input type=password></label><br>
 			<input type=submit value="アップロード">
 		</form>
+
+		<transition name=indicator>
+			<div class=uploading-indicator v-if=uploading><div>uploading...</div></div>
+		</transition>
 	</div>
 </template>
 
@@ -70,6 +110,8 @@ export default {
 			overview: '',
 			memo: '',
 			pdf: null,
+
+			uploading: false,
 		};
 	},
 	computed: {
@@ -84,6 +126,9 @@ export default {
 	methods: {
 		fileChange(ev) {
 			const file = ev.target.files[0];
+			if (!file) {
+				return;
+			}
 
 			if (file.type !== 'application/pdf') {
 				alert('PDF以外をアップロードすることは出来ません。');
@@ -104,6 +149,11 @@ export default {
 			reader.readAsDataURL(file);
 		},
 		upload() {
+			if (this.uploading) {
+				return;
+			}
+			this.uploading = true;
+
 			axios.post('/api/post', {
 				author: this.author,
 				degree: this.degree,
@@ -113,8 +163,8 @@ export default {
 				memo: this.memo,
 				pdf: this.pdf,
 			}).then(x => {
-				console.log('uploaded:', x);
-				alert('uploaded');
+				this.uploading = false;
+				this.$router.push({path: `/${this.year}/${this.author}/${this.title}`});
 			}).catch(err => {
 				console.error('failed to upload', err);
 			});
