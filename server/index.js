@@ -1,5 +1,7 @@
 const path = require('path');
 
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 
@@ -20,6 +22,11 @@ app.use(/\/(|detail|search|upload|20[0-9][0-9]\/[^\/]+\/.+)$/, (req, res) => {
 });
 
 app.post('/api/post', (req, res) => {
+	if (!req.body.pdf) {
+		res.status(400).json({ error: 'missing pdf' });
+		return;
+	}
+
 	let thesis = null;
 	try {
 		thesis = new database.Thesis(req.body);

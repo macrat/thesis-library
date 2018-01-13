@@ -4,12 +4,13 @@
   "description": "The graduation thesis library of Meguro laboratory.",
   "main": "server/index.js",
   "dependencies": {
-    "@google-cloud/datastore": "^1.3.3",
+    "@google-cloud/storage": "^1.5.2",
     "axios": "^0.17.1",
     "body-parser": "^1.18.2",
     "copy-webpack-plugin": "^4.3.1",
     "core-js": "^2.5.3",
     "css-loader": "^0.28.8",
+    "dotenv": "^4.0.0",
     "express": "^4.16.2",
     "morgan": "^1.9.0",
     "pdf2json": "^1.1.7",
@@ -18,13 +19,20 @@
     "vue-loader": "^13.7.0",
     "vue-router": "^3.0.1",
     "vue-template-compiler": "^2.5.13",
-    "webpack": "^3.10.0"
+    "webpack": "^3.10.0",
+    "zlib": "^1.0.5"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "nodemon": "^1.14.11",
+    "npm-run-all": "^4.1.2"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./server",
-    "build": "`npm bin`/webpack"
+    "start": "NODE_ENV=production node ./server",
+    "build": "NODE_ENV=production `npm bin`/webpack",
+    "debug": "`npm bin`/npm-run-all --parallel debug:start debug:build",
+    "debug:start": "NODE_ENV=development `npm bin`/nodemon -w ./server/ ./server",
+    "debug:build": "NODE_ENV=development `npm bin`/webpack --watch"
   },
   "repository": {
     "type": "git",
