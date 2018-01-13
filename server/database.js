@@ -75,9 +75,9 @@ class Thesis {
 class Index {
 	constructor(obj) {
 		this.data = {};
-		for (let x in (obj || [])) {
-			this.data[makeKey(x.year, x.author, x.title)] = obj[x];
-		}
+		(obj || []).forEach(x => {
+			this.data[makeKey(x.year, x.author, x.title)] = x;
+		});
 	}
 
 	append(thesis, content) {
