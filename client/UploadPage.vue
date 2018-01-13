@@ -164,6 +164,7 @@ export default {
 				pdf: this.pdf,
 			}).then(x => {
 				this.uploading = false;
+				this.$client.clearCache();
 				this.$router.push({path: `/${this.year}/${this.author}/${this.title}`});
 			}).catch(err => {
 				console.error('failed to upload', err);

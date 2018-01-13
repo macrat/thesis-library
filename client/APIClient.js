@@ -49,4 +49,9 @@ export default class {
 			});
 		}
 	}
+
+	clearCache() {
+		this._overviewIndex = null;
+		this._textIndex = null;
+	}
 }
