@@ -89,15 +89,20 @@ VueRouter.install(Vue);
 
 Vue.mixin({
 	mounted() {
-		let { title } = this.$options;
-		if (title) {
-			if (typeof title === 'function') {
-				title = title.call(this);
-			}
-			document.title = `${title} - Thesis Library`;
+		if (this.pageTitle) {
+			document.title = `${this.pageTitle} - Thesis Library`;
 		} else {
 			document.title = "Thesis Library";
 		}
+	},
+	watch: {
+		pageTitle() {
+			if (this.pageTitle) {
+				document.title = `${this.pageTitle} - Thesis Library`;
+			} else {
+				document.title = "Thesis Library";
+			}
+		},
 	},
 });
 

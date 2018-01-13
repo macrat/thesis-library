@@ -97,12 +97,12 @@ import PDFViewer from './PDFViewer';
 
 
 export default {
-	title: 'アップロードする',
 	components: {
 		'pdf-viewer': PDFViewer,
 	},
 	data() {
 		return {
+			pageTitle: 'アップロードする',
 			author: '',
 			degree: 'bachelor',
 			year: (new Date()).getFullYear() - 1,

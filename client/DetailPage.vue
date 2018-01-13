@@ -35,14 +35,12 @@ import PDFViewer from './PDFViewer';
 
 
 export default {
-	title() {
-		return this.$route.params.title;
-	},
 	components: {
 		'pdf-viewer': PDFViewer,
 	},
 	data() {
 		return {
+			pageTitle: this.$route.params.title,
 			thesis: {
 				year: this.$route.params.year,
 				degree: '',
@@ -54,13 +52,24 @@ export default {
 			}
 		};
 	},
+	watch: {
+		'$route': function() {
+			this.pageTitle = this.$route.params.title;
+			this.load();
+		},
+	},
 	created() {
-		this.$client.getMetadata(this.thesis.year, this.thesis.author, this.thesis.title)
-			.then(meta => this.thesis = meta)
-			.catch(err => {
-				alert('something wrong');
-				console.error(err);
-			})
+		this.load();
+	},
+	methods: {
+		load() {
+			this.$client.getMetadata(this.$route.params.year, this.$route.params.author, this.$route.params.title)
+				.then(meta => this.thesis = meta)
+				.catch(err => {
+					alert('something wrong');
+					console.error(err);
+				})
+		},
 	},
 }
 </script>

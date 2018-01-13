@@ -60,9 +60,9 @@ import Searcher from './searcher';
 
 
 export default {
-	title: '論文を探す',
 	data() {
 		return {
+			pageTitle: '論文を探す',
 			query: '',
 			result: [],
 		};
@@ -77,6 +77,12 @@ export default {
 	},
 	watch: {
 		query() {
+			if (!this.query) {
+				this.pageTitle = '論文を探す';
+			} else {
+				this.pageTitle = this.query + ' - 論文を探す';
+			}
+
 			if (!this.query) {
 				this.reset();
 				return;
