@@ -23,11 +23,16 @@
     "zlib": "^1.0.5"
   },
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "mocha": "^4.1.0",
     "nodemon": "^1.14.11",
-    "npm-run-all": "^4.1.2"
+    "npm-run-all": "^4.1.2",
+    "power-assert": "^1.4.4"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "`npm bin`/mocha --require babel-core/register",
     "start": "NODE_ENV=production node ./server",
     "build": "NODE_ENV=production `npm bin`/webpack",
     "debug": "`npm bin`/npm-run-all --parallel debug:start debug:build",

@@ -85,6 +85,7 @@ class Index {
 			year: thesis.year,
 			author: thesis.author,
 			title: thesis.title,
+			degree: thesis.degree,
 			content: content,
 		};
 	}
@@ -113,8 +114,6 @@ class Database {
 	put(thesis) {
 		return thesis.getText().then(thesisText => {
 			return new Promise((resolve, reject) => {
-				console.log('upload file');
-
 				if (!thesis._rawPDF) {
 					reject("this thesis hasn't pdf");
 					return;
@@ -142,19 +141,15 @@ class Database {
 
 				stream.end(thesis._rawPDF);
 			})
-			.then(() => console.log('get overview'))
 			.then(() => this.getOverviewIndex())
 			.then(overview => {
 				overview.append(thesis, thesis.overview);
-				console.log('upload overview');
 
 				return this._putIndex('index/overview', overview);
 			})
-			.then(() => console.log('get text'))
 			.then(() => this.getTextIndex())
 			.then(text => {
 				text.append(thesis, thesisText);
-				console.log('upload text');
 
 				return this._putIndex('index/text', text);
 			})

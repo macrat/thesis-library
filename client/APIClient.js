@@ -8,6 +8,9 @@ export default class {
 		} else {
 			this.origin = location.origin;
 		}
+
+		this._overviewIndex = null;
+		this._textIndex = null;
 	}
 
 	getMetadata(year, author, title) {
@@ -26,12 +29,24 @@ export default class {
 	}
 
 	getOverviewIndex() {
-		return axios.get(`${this.origin}/api/index/overview`)
-			.then(response => response.data);
+		if (this._overviewIndex) {
+			return Promise.resolve(this._overviewIndex);
+		} else {
+			return axios.get(`${this.origin}/api/index/overview`).then(response => {
+				this._overviewIndex = response.data;
+				return this._overviewIndex;
+			});
+		}
 	}
 
 	getTextIndex() {
-		return axios.get(`${this.origin}/api/index/text`)
-			.then(response => response.data);
+		if (this._textIndex) {
+			return Promise.resolve(this._textIndex);
+		} else {
+			return axios.get(`${this.origin}/api/index/text`).then(response => {
+				this._textIndex = response.data;
+				return this._textIndex;
+			});
+		}
 	}
 }
