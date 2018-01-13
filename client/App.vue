@@ -27,16 +27,13 @@ header > a {
 	flex-grow: 1;
 	display: flex;
 }
-nav {
+.side-menu {
 	border-right: 1px solid gray;
 	box-sizing: border-box;
 	margin: .5em 0;
 	padding: 0 1em;
 	width: 15em;
 	min-width: 10em;
-}
-ul {
-	padding-left: 1em;
 }
 
 .content-area {
@@ -67,28 +64,7 @@ footer {
 		</header>
 
 		<div>
-			<nav>
-				<ul>
-					<li>2017年度</li>
-					<ul>
-						<li>なんかすごい論文</li>
-						<li>すごくすごい論文</li>
-						<li>やばい論文</li>
-						<li>なんかすごい論文</li>
-						<li>すごくすごい論文</li>
-						<li>やばい論文</li>
-						<li>なんかすごい論文</li>
-						<li>すごくすごい論文</li>
-						<li>やばい論文</li>
-						<li>なんかすごい論文</li>
-						<li>すごくすごい論文</li>
-						<li>やばい論文</li>
-					</ul>
-					<li>2019年度</li>
-					<li>2020年度</li>
-					<li>2021年度</li>
-				</ul>
-			</nav>
+			<side-menu class=side-menu />
 
 			<div class=content-area>
 				<router-view />
@@ -102,6 +78,8 @@ footer {
 <script>
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+
+import SideMenu from './SideMenu';
 
 
 VueRouter.install(Vue);
@@ -123,6 +101,7 @@ Vue.mixin({
 
 
 export default {
+	components: { SideMenu },
 	router: new VueRouter({
 		mode: 'history',
 		scrollBehavior(to, from, savedPosition) {

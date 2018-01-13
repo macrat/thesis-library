@@ -15,6 +15,16 @@ export default class {
 			.then(response => response.data);
 	}
 
+	getYearList() {
+		return axios.get(`${this.origin}/api/thesis/`)
+			.then(response => response.data)
+	}
+
+	getThesisesOfYear(year) {
+		return axios.get(`${this.origin}/api/thesis/${year}/`)
+			.then(response => response.data)
+	}
+
 	getOverviewIndex() {
 		return axios.get(`${this.origin}/api/index/overview`)
 			.then(response => response.data);

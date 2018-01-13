@@ -52,10 +52,55 @@ app.post('/api/post', (req, res) => {
 
 app.get(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/(.+)\/metadata$/, (req, res) => {
 	const db = new database.Database;
-	db.get(req.params[0], decodeURIComponent(req.params[1]), decodeURIComponent(req.params[2]))
+	db.get(Number(req.params[0]), decodeURIComponent(req.params[1]), decodeURIComponent(req.params[2]))
 		.then(thesis => res.status(200).json(thesis.asSendableJSON()))
 		.catch(err => {
 			console.error(err);
+		})
+});
+
+app.get('/api/thesis/', (req, res) => {
+	(new database.Database()).getOverviewIndex()
+		.then(index => {
+			console.log(index.asArray()[0])
+			const result = index.asArray().map(x => x.year).filter((x, i, xs) => xs.indexOf(x) === i);
+			res.status(200).json(result);
+		})
+		.catch(err => {
+			console.error(err);
+			res.status(500).json({ error: 'something wrong' });
+		})
+});
+
+app.get(/^\/api\/thesis\/(20[0-9][0-9])\//, (req, res) => {
+	(new database.Database()).getOverviewIndex()
+		.then(index => {
+			const result = index.asArray().filter(x => x.year === Number(req.params[0])).map(x => ({
+				year: x.year,
+				author: x.author,
+				title: x.title,
+			}))
+			res.status(200).json(result);
+		})
+		.catch(err => {
+			console.error(err);
+			res.status(500).json({ error: 'something wrong' });
+		})
+});
+
+app.get(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\./, (req, res) => {
+	(new database.Database()).getOverviewIndex()
+		.then(index => {
+			const result = index.asArray().filter(x => x.year === Number(req.params[0]) && x.author === req.params[1]).map(x => ({
+				year: x.year,
+				author: x.author,
+				title: x.title,
+			}))
+			res.status(200).json(result);
+		})
+		.catch(err => {
+			console.error(err);
+			res.status(500).json({ error: 'something wrong' });
 		})
 });
 

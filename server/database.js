@@ -16,7 +16,7 @@ class Thesis {
 	constructor(obj) {
 		if (!obj) throw 'obj was undefined';
 
-		this.year = obj.year;
+		this.year = Number(obj.year);
 		this.degree = obj.degree;
 		this.author = obj.author;
 		this.title = obj.title;
@@ -76,7 +76,7 @@ class Index {
 	constructor(obj) {
 		this.data = {};
 		for (let x in (obj || [])) {
-			this.data[makeKey(x.year, x.author, x.title)] = obj;
+			this.data[makeKey(x.year, x.author, x.title)] = obj[x];
 		}
 	}
 
