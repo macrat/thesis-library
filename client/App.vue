@@ -19,6 +19,9 @@ header > a {
 	font-weight: bold;
 	color: #b3424a;
 }
+header > a:focus {
+	outline: none;
+}
 .menu a.router-link-exact-active {
 	text-decoration: underline;
 }
@@ -61,7 +64,7 @@ footer {
 <template>
 	<div class=wrapper>
 		<header>
-			<router-link to="/">Thesis Library</router-link>
+			<router-link to="/" tabindex=-1 ref=sitename>Thesis Library</router-link>
 
 			<span class=menu>
 				<router-link to="/search">論文を探す</router-link>
@@ -150,6 +153,11 @@ export default {
 				component: NotFound,
 			},
 		],
-	})
+	}),
+	watch: {
+		'$route': function() {
+			this.$refs.sitename.$el.focus();
+		},
+	},
 }
 </script>

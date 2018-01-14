@@ -18,7 +18,7 @@ ul {
 	<nav>
 		<ul>
 			<li v-for="year in years">
-				<span class=side-menu--button @click="openClose(year.num)">{{ year.num }}年度</span>
+				<span class=side-menu--button tabindex=0 @click="openClose(year.num)">{{ year.num }}年度</span>
 				<ul v-if="year.num === current">
 					<li v-for="thesis in year.thesises">
 						<a
