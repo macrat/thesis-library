@@ -132,8 +132,8 @@ export default {
 			result: [],
 			options: {
 				query: '',
-				yearFrom: 0,
-				yearTo: 0,
+				yearFrom: '0',
+				yearTo: '0',
 				degree: 'all',
 				titleEnabled: true,
 				authorEnabled: false,
@@ -164,8 +164,8 @@ export default {
 				const year = now.getFullYear() - ((now.getMonth() < 3) ? 1 : 0);
 
 				const options = {
-					yearFrom: this.options.yearFrom === 0 ? null : year - this.options.yearFrom,
-					yearTo: this.options.yearTo === 0 ? null : year - this.options.yearTo,
+					yearFrom: this.options.yearFrom === '0' ? null : year - Number(this.options.yearFrom),
+					yearTo: this.options.yearTo === '0' ? null : year - Number(this.options.yearTo),
 					degree: this.options.degree === 'all' ? null : this.options.degree,
 					title: this.options.titleEnabled,
 					author: this.options.authorEnabled,
