@@ -142,6 +142,7 @@ export default {
 				this.uploadedPassword = result.password;
 			}).catch(err => {
 				alert('アップロードに失敗しました。\nしばらく待ってからもう一度試してみてください。');
+				this.uploading = false;
 				console.error('failed to upload', err);
 			});
 		},
