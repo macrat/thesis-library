@@ -304,7 +304,7 @@ export default class {
 		});
 
 		let html = '';
-		if (thesis.data.text && (textMarks.length > 0 || overviewMarks.length !== 0)) {
+		if (thesis.data.text && (textMarks.length > 0 || overviewMarks.length === 0)) {
 			html = markup(thesis.data.text, textMarks);
 		} else {
 			html = markup(thesis.data.overview, overviewMarks);

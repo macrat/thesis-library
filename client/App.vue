@@ -52,6 +52,12 @@ footer {
 }
 </style>
 
+<style>
+*:focus {
+	outline: 1px solid #b3424a;
+}
+</style>
+
 <template>
 	<div class=wrapper>
 		<header>
