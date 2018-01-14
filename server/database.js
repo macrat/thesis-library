@@ -44,7 +44,14 @@ class Index {
 
 class Database {
 	constructor() {
-		this.storage = Storage({ projectId: process.env.GCLOUD_PROJECT });
+		if (process.env.GCLOUD_SERVICE_ACCOUNT) {
+			this.storage = Storage({
+				projectId: process.env.GCLOUD_PROJECT,
+				credentials: JSON.parse(process.env.GCLOUD_SERVICE_ACCOUNT),
+			});
+		} else {
+			this.storage = Storage({ projectId: process.env.GCLOUD_PROJECT });
+		}
 		this.bucket = this.storage.bucket(process.env.GCLOUD_BUCKET);
 	}
 

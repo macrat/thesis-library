@@ -40,8 +40,7 @@
     "debug": "`npm bin`/npm-run-all --parallel debug:start debug:build",
     "debug:start": "NODE_ENV=development `npm bin`/nodemon -w ./server/ ./server",
     "debug:build": "NODE_ENV=development `npm bin`/webpack --watch",
-    "postinstall": "npm run build",
-	"heroku-postbuild": "printenv GCLOUD_SERVICE_ACCOUNT > .google-cert.json"
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
