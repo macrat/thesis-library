@@ -2,12 +2,5 @@ build:
   languages:
     - node
 
-  pre:
-    - GOOGLE_APPLICATION_CREDENTIALS=`pwd`/google-cert.json
-    - printenv GCLOUD_SERVICE_ACCOUNT > ${GOOGLE_APPLICATION_CREDENTIALS}
-
-  post:
-    - npm test
-
 run:
-  web: npm start
+  web: GOOGLE_APPLICATION_CREDENTIALS="`pwd`/google-cert.json" npm start
