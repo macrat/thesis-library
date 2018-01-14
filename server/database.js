@@ -1,81 +1,20 @@
 const zlib = require('zlib');
-const md5 = require('md5');
 
 const Storage = require('@google-cloud/storage');
-const storage = Storage({ projectId: process.env.GCLOUD_PROJECT });
-const bucket = storage.bucket(process.env.GCLOUD_BUCKET);
 
-const pdf = require('./pdf');
+const Thesis = require('./thesis');
 
 
 function makeKey(year, author, title) {
+	if (!year || !author || !title) {
+		throw 'missing argument';
+	}
 	return `${year}/${author}/${title}`;
 }
 
 
-class Thesis {
-	constructor(obj) {
-		if (!obj) throw 'obj was undefined';
-
-		this.year = Number(obj.year);
-		this.degree = obj.degree;
-		this.author = obj.author;
-		this.title = obj.title;
-		this.overview = obj.overview;
-		this.memo = obj.memo || '';
-		this._rawPDF = obj.rawPDF;
-		this.password = md5(obj.password);
-
-		if (!this._rawPDF && typeof obj.pdf === 'string') {
-			this._rawPDF = new Buffer(obj.pdf, 'base64');
-		}
-
-		if (!this.year) throw 'missing year';
-		if (!this.degree) throw 'missing degree';
-		if (!this.author) throw 'missing author';
-		if (!this.title) throw 'missing title';
-		if (!this.overview) throw 'missing overview';
-		if (!this.password) throw 'missing password';
-
-		if (this.degree !== 'bachelor' && this.degree !== 'master' && this.degree !== 'doctor') {
-			throw 'invalid degree';
-		}
-	}
-
-	get key() {
-		return makeKey(this.year, this.author, this.title);
-	}
-
-	getPDF() {
-		if (this._rawPDF) {
-			return Promise.resolve(this._rawPDF);
-		} else {
-			return bucket.file(this.key).download().then(data => {
-				this._rawPDF = data[0];
-				return this._rawPDF;
-			});
-		}
-	}
-
-	getText() {
-		return this.getPDF().then(pdf.toText);
-	}
-
-	asSendableJSON() {
-		return {
-			year: this.year,
-			degree: this.degree,
-			author: this.author,
-			title: this.title,
-			overview: this.overview,
-			memo: this.memo,
-			pdf: `https://storage.googleapis.com/${process.env.GCLOUD_BUCKET}/${this.year}/${encodeURIComponent(this.author)}/${encodeURIComponent(this.title)}`,
-		};
-	}
-
-	checkPassword(password) {
-		return this.password === md5(password);
-	}
+function makeKeyFor(thesis) {
+	return makeKeyFor(thesis.year, thesis.author, thesis.title);
 }
 
 
@@ -112,8 +51,13 @@ class Index {
 
 
 class Database {
+	constructor() {
+		this.storage = Storage({ projectId: process.env.GCLOUD_PROJECT });
+		this.bucket = this.storage.bucket(process.env.GCLOUD_BUCKET);
+	}
+
 	get(year, author, title) {
-		return bucket.file(makeKey(year, author, title)).getMetadata().then(data => {
+		return this.bucket.file(makeKey(year, author, title)).getMetadata().then(data => {
 			return new Thesis(data[1].metadata);
 		});
 	}
@@ -126,7 +70,7 @@ class Database {
 					return;
 				}
 
-				const file = bucket.file(thesis.key);
+				const file = this.bucket.file(makeKeyFor(thesis));
 
 				const stream = file.createWriteStream({
 					metadata: {
@@ -171,7 +115,7 @@ class Database {
 				if (err) {
 					reject(err);
 				} else {
-					const file = bucket.file(key);
+					const file = this.bucket.file(key);
 
 					const stream = file.createWriteStream({
 						metadata: {
@@ -191,7 +135,7 @@ class Database {
 	}
 
 	_getIndex(key) {
-		return bucket.file(key).download()
+		return this.bucket.file(key).download()
 			.catch(err => '[]')
 			.then(x => new Index(JSON.parse(x[0])));
 	}
@@ -206,7 +150,5 @@ class Database {
 };
 
 
-module.exports = {
-	Database: Database,
-	Thesis: Thesis,
-}
+module.exports = Database;
+module.exports.Index = Index;

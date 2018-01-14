@@ -1,66 +1,6 @@
-function stringQuery(query) {
-	const ignoreCase = !/[A-Z]/.test(query) && /[a-z]/.test(query);
-	const queries = query.split(' ').filter(x => x.length > 0);
-
-	return function(elm, text) {
-		const result = [];
-
-		if (ignoreCase) {
-			text = text.toLowerCase();
-		}
-
-		for (let q of queries) {
-			result.push([]);
-
-			let idx = -1;
-			while (idx < text.length) {
-				idx = text.indexOf(q, idx + 1);
-
-				if (idx < 0) {
-					break;
-				}
-
-				result[result.length-1].push(new Marker(idx, idx + q.length, elm));
-			}
-		}
-
-		return result;
-	}
-}
-
-
-function regexpQuery(query) {
-	const ignoreCase = !/[A-Z]/.test(query) && /[a-z]/.test(query);
-	const re = new RegExp(query, 'g' + (ignoreCase ? 'i' : ''));
-
-	return function(elm, text) {
-		re.lastIndex = 0;
-		const result = [];
-
-		let found = null;
-		while (found = re.exec(text)) {
-			result.push(new Marker(found.index, found.index + found[0].length, elm));
-		}
-
-		return [result];
-	}
-}
-
-
-function nonFilterQuery(elm, text) {
-	return [[new Marker(0, 0, elm)]];
-}
-
-
-function queryFunc(q) {
-	if (q.length >= 3 && q[0] === '/' && q[q.length - 1] === '/') {
-		return regexpQuery(q.slice(1, q.length - 1));
-	} else if (q.trim()) {
-		return stringQuery(q);
-	} else {
-		return nonFilterQuery;
-	}
-}
+import Marker, { joinMarks } from './marker';
+import queryFunc from './query';
+import sanitize from './sanitize';
 
 
 function mergeFound(founds) {
@@ -137,41 +77,6 @@ function mergeResults(a, b) {
 }
 
 
-function sanitize(str) {
-	return str.replace(/[&'`"<>]/g, m => ({
-		'&': '&amp;',
-		"'": '&#x27;',
-		'"': '&quot;',
-		'<': '&lt;',
-		'>': '&gt;',
-	}[m]));
-}
-
-
-function joinMarks(marks) {
-	const result = [];
-	marks.forEach(x => {
-		let found = false;
-		for (let i=0; i<result.length; i++) {
-			const y = result[i];
-			if (x.isOverwrapWith(y)) {
-				result[i] = x.merge(y);
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			result.push(x);
-		}
-	});
-	if (result.length === marks.length) {
-		return result;
-	} else {
-		return this.joinMarks(result);
-	}
-}
-
-
 function markup(text, marks) {
 	marks = marks.filter(x => x.from !== x.to).sort((x, y) => x.from - y.from);
 
@@ -196,42 +101,13 @@ function markup(text, marks) {
 
 
 export const debug = {
-	stringQuery: stringQuery,
-	regexpQuery: regexpQuery,
-	queryFunc: queryFunc,
 	mergeFound: mergeFound,
 	check: check,
 	search: search,
 	resultIndexOf: resultIndexOf,
 	mergeResults: mergeResults,
-	sanitize: sanitize,
-	joinMarks: joinMarks,
 	markup: markup,
 };
-
-
-export class Marker {
-	constructor(from, to, elm=null) {
-		this.from = from;
-		this.to = to;
-		this.elm = elm;
-	}
-
-	isOverwrapWith(mark) {
-		return this.from <= mark.to && mark.from <= this.to;
-	}
-
-	get length() {
-		return this.to - this.from;
-	}
-
-	merge(mark) {
-		if (!this.isOverwrapWith(mark)) {
-			throw 'is not overwraped';
-		}
-		return new Marker(Math.min(this.from, mark.from), Math.max(this.to, mark.to));
-	}
-}
 
 
 export default class {
