@@ -35,6 +35,7 @@ h2 {
 }
 
 .search-options--button input {
+	position: absolute;
 	visibility: hidden;
 	width: 0;
 	padding: 0;
