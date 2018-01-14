@@ -68,7 +68,7 @@ mark {
 			<input type=search placeholder="検索" v-model=options.query>
 			<div class=search-options>
 				<span>
-					卒業年:
+					提出年:
 					<label><select v-model=options.yearFrom>
 						<option value=1>1年前</option>
 						<option value=2>2年前</option>
@@ -87,7 +87,7 @@ mark {
 				</span>
 
 				<span>
-					区分:
+					学位:
 					<label><select v-model=options.degree>
 						<option value=doctor>博士</option>
 						<option value=master>修士</option>
