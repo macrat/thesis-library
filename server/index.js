@@ -18,6 +18,16 @@ const server = app.listen(process.env.PORT || 8080, () => {
 app.use(require('morgan')('combined'));
 app.use(require('body-parser').json({ limit: '100mb' }));
 
+
+app.use((req, res, next) => {
+	if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] !== 'https') {
+		res.redirect('https://' + req.headers.host + req.url);
+	} else {
+		next();
+	}
+});
+
+
 app.use(express.static(path.join(__dirname, '../build/')));
 
 
