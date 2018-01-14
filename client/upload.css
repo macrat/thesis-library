@@ -1,0 +1,50 @@
+.title {
+	width: 100%;
+}
+
+.overview, .memo {
+	resize: vertical;
+	width: 100%;
+}
+.overview {
+	height: 30em;
+}
+.memo {
+	height: 5em;
+}
+
+.uploading-indicator {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.6);
+	z-index: 100;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	font-size: 200%;
+}
+.uploading-indicator > div{
+	animation: loading-animation 2s ease 0s infinite alternate;
+}
+@keyframes loading-animation {
+	0% {
+		opacity: .1;
+	}
+	80%, 100% {
+		opacity: .9;
+	}
+}
+
+.indicator-enter-active {
+	transition: opacity 1s;
+}
+.indicator-leave-active {
+	transition: opacity .5s;
+}
+.indicator-enter, .indicator-leave-to {
+	opacity: 0;
+}

@@ -235,4 +235,24 @@ export default function() {
 		assert.notStrictEqual(json.pdf.length, 0);
 		assert.doesNotThrow(() => new URL(json.pdf, 'http://test'));
 	});
+
+	it('key', () => {
+		assert.strictEqual(new Thesis({
+			year: 2017,
+			degree: 'bachelor',
+			author: 'author',
+			title: 'title test',
+			overview: 'this is overview',
+			rawPassword: 'abc',
+		}).key, '2017/author/title test');
+
+		assert.strictEqual(new Thesis({
+			year: 2015,
+			degree: 'bachelor',
+			author: 'user',
+			title: 'foobar',
+			overview: 'this is overview',
+			rawPassword: 'abc',
+		}).key, '2015/user/foobar');
+	});
 }

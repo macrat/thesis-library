@@ -3,19 +3,7 @@ const zlib = require('zlib');
 const Storage = require('@google-cloud/storage');
 
 const Thesis = require('./thesis');
-
-
-function makeKey(year, author, title) {
-	if (!year || !author || !title) {
-		throw 'missing argument';
-	}
-	return `${year}/${author}/${title}`;
-}
-
-
-function makeKeyFor(thesis) {
-	return makeKeyFor(thesis.year, thesis.author, thesis.title);
-}
+const makeKey = require('./utils').makeKey;
 
 
 class Index {
@@ -27,13 +15,17 @@ class Index {
 	}
 
 	append(thesis, content) {
-		this.data[makeKey(thesis.year, thesis.author, thesis.title)] = {
+		this.data[thesis.key] = {
 			year: thesis.year,
 			author: thesis.author,
 			title: thesis.title,
 			degree: thesis.degree,
 			content: content,
 		};
+	}
+
+	remove(thesis) {
+		delete this.data[makeKey(thesis.year, thesis.author, thesis.title)];
 	}
 
 	asArray() {
@@ -63,14 +55,14 @@ class Database {
 	}
 
 	put(thesis) {
-		return thesis.getText().then(thesisText => {
+		return thesis.getText(this.bucket).then(thesisText => {
 			return new Promise((resolve, reject) => {
 				if (!thesis._rawPDF) {
 					reject("this thesis hasn't pdf");
 					return;
 				}
 
-				const file = this.bucket.file(makeKeyFor(thesis));
+				const file = this.bucket.file(thesis.key);
 
 				const stream = file.createWriteStream({
 					metadata: {
@@ -109,6 +101,123 @@ class Database {
 		});
 	}
 
+	remove(thesis) {
+		this.getTextIndex()
+			.then(text => {
+				text.remove(thesis);
+
+				return this._putIndex('index/text', text);
+			})
+			.then(() => this.getOverviewIndex())
+			.then(overview => {
+				overview.remove(thesis);
+
+				return this._putIndex('index/overview', overview);
+			})
+			.then(() => {
+				return this.bucket.file(thesis.key).delete();
+			})
+			.then(() => null);
+	}
+
+	updateMetadata(oldThesis, newThesis) {
+		let metadata = {};
+		let metadataChanged = false;
+
+		if (newThesis.year !== oldThesis.year) {
+			metadata.year = newThesis.year;
+			metadataChanged = true;
+		}
+		if (newThesis.degree !== oldThesis.degree) {
+			metadata.degree = newThesis.degree;
+			metadataChanged = true;
+		}
+		if (newThesis.author !== oldThesis.author) {
+			metadata.author = newThesis.author;
+			metadataChanged = true;
+		}
+		if (newThesis.title !== oldThesis.title) {
+			metadata.title = newThesis.title;
+			metadataChanged = true;
+		}
+		if (newThesis.overview !== oldThesis.overview) {
+			metadata.overview = newThesis.overview;
+			metadataChanged = true;
+		}
+		if (newThesis.memo !== oldThesis.memo) {
+			metadata.memo = newThesis.memo;
+			metadataChanged = true;
+		}
+		if (newThesis.password !== oldThesis.password) {
+			metadata.password = newThesis.password;
+			metadataChanged = true;
+		}
+
+		const keyChanged = oldThesis.key !== newThesis.key;
+
+		return Promise.resolve()
+			.then(() => {
+				if (newThesis.hasPDF()) {
+					return Promise.all([oldThesis.getText(this.bucket), newThesis.getText(this.bucket)]).then(texts => {
+						if (keyChanged || texts[0] !== texts[1]) {
+							return this.getTextIndex().then(text => {
+								text.remove(oldThesis);
+								text.append(newThesis, texts[1]);
+
+								return this._putIndex('index/text', text);
+							});
+						}
+					});
+				} else {
+					if (keyChanged) {
+						return Promise.all([oldThesis.getText(this.bucket), this.getTextIndex()]).then(data => {
+							data[1].remove(oldThesis);
+							data[1].append(newThesis, data[0]);
+
+							return this._putIndex('index/text', data[1]);
+						});
+					}
+				}
+			})
+			.then(() => {
+				if (keyChanged || oldThesis.overview !== newThesis.overview) {
+					return this.getOverviewIndex().then(overview => {
+						overview.remove(oldThesis);
+						overview.append(newThesis, newThesis.overview);
+
+						return this._putIndex('index/overview', overview);
+					});
+				}
+			})
+			.then(() => {
+				const file = this.bucket.file(oldThesis.key);
+
+				if (oldThesis.key !== newThesis.key) {
+					return file.move(newThesis.key).then(result => {
+						return result[0].makePublic().then(() => result[0]);
+					})
+				} else {
+					return file;
+				}
+			})
+			.then(file => {
+				if (metadataChanged) {
+					return file.setMetadata({
+						metadata: metadata,
+					});
+				}
+			})
+			.then(() => null);
+	}
+
+	update(oldThesis, newThesis) {
+		if (oldThesis.key === newThesis.key) {
+			return this.put(newThesis);
+		} else {
+			return this.put(newThesis).then(() => this.remove(oldThesis));
+		}
+	}
+
 	_putIndex(key, index) {
 		return new Promise((resolve, reject) => {
 			zlib.gzip(index.asJSON(), {level:9}, (err, binary) => {
@@ -136,8 +245,8 @@ class Database {
 
 	_getIndex(key) {
 		return this.bucket.file(key).download()
-			.catch(err => '[]')
-			.then(x => new Index(JSON.parse(x[0])));
+			.catch(err => [])
+			.then(x => new Index(JSON.parse(x[0] || '[]')));
 	}
 
 	getOverviewIndex() {

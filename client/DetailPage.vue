@@ -34,27 +34,28 @@ pre {
 		</article>
 
 		<a :href=thesis.pdf :class="{'link-disabled': !thesis.pdf}" @click="!thesis.pdf ? $event.prevent() : null" target=_blank>PDFを開く</a>
-		<a href :class="{'link-disabled': !thesis.pdf}" @click="!thesis.pdf ? $event.prevent() : null">編集</a>
+		<a
+			:href="`/${thesis.year}/${encodeURIComponent(thesis.author)}/${encodeURIComponent(thesis.title)}/edit`"
+			:class="{'link-disabled': !thesis.pdf}"
+			@click.prevent="edit">編集</a>
 		<pdf-viewer :src=thesis.pdf :selectable=true />
 	</div>
 	<not-found v-else-if="error === 'notfound'" />
-	<div v-else>
-		<h1>読み込めませんでした</h1>
-		何か問題が起きているようです。<br>
-		しばらく待っても解決しないようなら、管理者にお問い合わせください。<br>
-	</div>
+	<failed-to-load v-else />
 </template>
 
 <script>
 import PDFViewer from './PDFViewer';
 
 import NotFound from './NotFound';
+import FailedToLoad from './FailedToLoad';
 
 
 export default {
 	components: {
 		'pdf-viewer': PDFViewer,
 		'not-found': NotFound,
+		'failed-to-load': FailedToLoad,
 	},
 	data() {
 		return {
@@ -100,9 +101,31 @@ export default {
 					if (err.response.status === 404) {
 						this.error = 'notfound';
 					} else {
+						console.error(err);
 						this.error = 'unknown';
 					}
 				})
+		},
+		edit() {
+			const password = window.prompt('編集用のパスワード');
+			if (password) {
+				this.$client.checkPassword(this.thesis.year, this.thesis.author, this.thesis.title, password)
+					.then(ok => {
+						if (ok) {
+							this.$router.push({ name: 'edit', params: {
+								year: this.thesis.year,
+								author: this.thesis.author,
+								title: this.thesis.title,
+								password: password,
+							}});
+						} else {
+							alert('パスワードが違います。');
+						}
+					})
+					.catch(err => {
+						this.error = 'unknown';
+					})
+			}
 		},
 	},
 }

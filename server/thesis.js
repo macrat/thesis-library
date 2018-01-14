@@ -1,6 +1,7 @@
 const md5 = require('md5');
 
 const pdf = require('./pdf');
+const makeKey = require('./utils').makeKey;
 
 
 class Thesis {
@@ -36,7 +37,15 @@ class Thesis {
 		}
 	}
 
-	getPDF() {
+	hasPDF() {
+		return !!this._rawPDF;
+	}
+
+	get key() {
+		return makeKey(this.year, this.author, this.title);
+	}
+
+	getPDF(bucket) {
 		if (this._rawPDF) {
 			return Promise.resolve(this._rawPDF);
 		} else {
@@ -47,8 +56,8 @@ class Thesis {
 		}
 	}
 
-	getText() {
-		return this.getPDF().then(pdf.toText);
+	getText(bucket) {
+		return this.getPDF(bucket).then(pdf.toText);
 	}
 
 	asSendableJSON() {

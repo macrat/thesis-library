@@ -1,3 +1,11 @@
+module.exports.makeKey = function(year, author, title) {
+	if (!year || !author || !title) {
+		throw 'missing argument';
+	}
+	return `${year}/${author}/${title}`;
+}
+
+
 module.exports.makePassword = function() {
 	const set = 'ABCDEFGHJKLMNRWXY347';
 	const r = [];

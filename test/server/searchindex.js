@@ -84,4 +84,25 @@ export default function() {
 			assert.deepStrictEqual(this.index.asArray().sort((x, y) => x.year - y.year), exceptArray);
 		});
 	});
+
+	describe('remove', function() {
+		it('exists', function() {
+			this.index.remove(this.original[0]);
+
+			assert.deepStrictEqual(this.index.asArray(), this.original.slice(1));
+		});
+
+		it('not exists', function() {
+			this.index.remove(new Thesis({
+				year: 2020,
+				author: 'hello',
+				title: 'world',
+				degree: 'bachelor',
+				overview: 'test',
+				rawPassword: 'hogehoge',
+			}));
+
+			assert.deepStrictEqual(this.index.asArray(), this.original);
+		});
+	});
 }

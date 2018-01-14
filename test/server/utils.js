@@ -1,9 +1,14 @@
 import assert from 'power-assert';
 
-import { makePassword } from '../../server/utils';
+import { makeKey, makePassword } from '../../server/utils';
 
 
 export default function() {
+	it('makeKey', () => {
+		assert.strictEqual(makeKey(2017, 'hoge', 'fuga'), '2017/hoge/fuga');
+		assert.strictEqual(makeKey(2017, 'hoge fuga', 'foo bar'), '2017/hoge fuga/foo bar');
+	});
+
 	it('makePassword', () => {
 		const results = [];
 		for (let i=0; i<10; i++) {

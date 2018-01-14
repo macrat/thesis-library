@@ -39,7 +39,7 @@ app.post('/api/post', (req, res) => {
 			author: req.body.author,
 			title: req.body.title,
 			overview: req.body.overview,
-			memo: req.body.memon,
+			memo: req.body.memo,
 			pdf: req.body.pdf,
 			rawPassword: req.body.password,
 		});
@@ -79,6 +79,96 @@ app.get(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/(.+)\/metadata$/, (req, res) 
 });
 
 
+app.post(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/(.+)\/check-password$/, (req, res) => {
+	if (!req.body.password) {
+		res.status(400).json({ error: 'missing password' });
+		return;
+	}
+	if (typeof req.body.password !== 'string') {
+		res.status(400).json({ error: 'invalid password' });
+	}
+
+	const db = new Database();
+	db.get(Number(req.params[0]), decodeURIComponent(req.params[1]), decodeURIComponent(req.params[2]))
+		.then(thesis => {
+			if (thesis.checkPassword(req.body.password)) {
+				res.status(200).json({ result: 'correct' });
+			} else {
+				res.status(200).json({ result: 'incorrect' });
+			}
+		})
+		.catch(err => {
+			if (err.code === 404) {
+				res.status(404).json({ error: 'not found' });
+			} else {
+				console.error(err);
+				res.status(500).json({ error: 'something wrong' });
+			}
+		})
+});
+
+
+app.post(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/([^\/]+)\/update$/, (req, res) => {
+	if (!req.body.password) {
+		res.status(400).json({ error: 'missing password' });
+		return;
+	}
+	if (typeof req.body.password !== 'string') {
+		res.status(400).json({ error: 'invalid password' });
+	}
+
+	const db = new Database();
+	db.get(Number(req.params[0]), decodeURIComponent(req.params[1]), decodeURIComponent(req.params[2]))
+		.catch(err => {
+			if (err.code === 404) {
+				res.status(404).json({ error: 'not found' });
+			} else {
+				return Promise.reject(err);
+			}
+		})
+		.then(thesis => {
+			if (!thesis.checkPassword(req.body.password)) {
+				res.status(403).json({ result: 'incorrect' });
+			}
+
+			let newThesis = null;
+			try {
+				newThesis = new Thesis({
+					year: Number(req.body.year) || thesis.year,
+					degree: req.body.degree || thesis.degree,
+					author: req.body.author || thesis.author,
+					title: req.body.title || thesis.title,
+					overview: req.body.overview || thesis.overview,
+					memo: req.body.memo || thesis.memo,
+					pdf: req.body.pdf || undefined,
+					rawPassword: req.body.password,
+				});
+			} catch(e) {
+				return Promise.reject(e);
+			}
+
+			if (req.body.pdf) {
+				return db.update(thesis, newThesis);
+			} else {
+				return db.updateMetadata(thesis, newThesis);
+			}
+		})
+		.then(() => {
+			res.status(200).json({});
+		})
+		.catch(err => {
+			if (typeof err === 'string' && err.startsWith && err.startsWith('missing ')) {
+				res.status(400).json({ error: err });
+			} else if (err === 'invalid degree') {
+				res.status(400).json({ error: err });
+			} else {
+				console.error(err);
+				res.status(500).json({ error: 'something wrong' });
+			}
+		})
+});
+
+
 app.get('/api/thesis/', (req, res) => {
 	(new Database()).getOverviewIndex()
 		.then(index => {
@@ -96,22 +186,6 @@ app.get(/^\/api\/thesis\/(20[0-9][0-9])\//, (req, res) => {
 	(new Database()).getOverviewIndex()
 		.then(index => {
 			const result = index.asArray().filter(x => x.year === Number(req.params[0])).map(x => ({
-				year: x.year,
-				author: x.author,
-				title: x.title,
-			}))
-			res.status(200).json(result);
-		})
-		.catch(err => {
-			console.error(err);
-			res.status(500).json({ error: 'something wrong' });
-		})
-});
-
-app.get(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\./, (req, res) => {
-	(new Database()).getOverviewIndex()
-		.then(index => {
-			const result = index.asArray().filter(x => x.year === Number(req.params[0]) && x.author === req.params[1]).map(x => ({
 				year: x.year,
 				author: x.author,
 				title: x.title,

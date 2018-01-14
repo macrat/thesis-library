@@ -145,8 +145,13 @@ export default {
 				component: () => require.ensure([], require => require('./UploadPage'), '/upload'),
 			},
 			{
+				name: 'edit',
+				path: '/:year/:author/:title/edit',
+				component: () => require.ensure([], require => require('./EditPage'), '/edit'),
+			},
+			{
 				name: 'detail',
-				path: '/:year/:author/:title*',
+				path: '/:year/:author/:title',
 				component: () => require.ensure([], require => require('./DetailPage'), '/detail'),
 			},
 			{
