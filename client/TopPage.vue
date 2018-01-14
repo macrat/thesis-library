@@ -12,7 +12,7 @@
 		論文はPDFでダウンロード出来るので、必要であればお手元でご覧ください。（たぶんそっちの方が読みやすいです）<br>
 		自分の論文が出来たら、後輩のために<a href="/upload" @click.prevent="$router.push({ path: '/upload' })">アップロード</a>にご協力ください。<br>
 		<br>
-		<a href="/license">利用規約</a>があるので、読んでおいてください。法と公序良俗を守れ、自己責任で使え、サイトが消えたらごめんね、という感じの内容です。<br>
+		<a href="/license" @click.prevent="$router.push({ path: '/license' })">利用規約</a>があるので、読んでおいてください。法と公序良俗を守れ、自己責任で使え、サイトが消えたらごめんね、という感じの内容です。<br>
 
 		<h2>開発や運営を手伝いたい</h2>
 		<a href="https://github.com/macrat/thesis-library">GitHub</a>にどうぞ。<br>
