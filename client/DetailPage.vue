@@ -10,6 +10,10 @@ h2 {
 	font-size: 120%;
 }
 
+pre {
+	font-family: unset;
+}
+
 .link-disabled {
 	color: gray;
 }
@@ -21,12 +25,12 @@ h2 {
 		{{ thesis.year }}年度 {{ {bachelor: '学士', master: '修士', doctor: '博士' }[thesis.degree] }} {{ thesis.author }}<br>
 		<article>
 			<h2>概要</h2>
-			{{ thesis.overview }}
+			<pre>{{ thesis.overview }}</pre>
 		</article>
 
 		<article v-if=thesis.memo>
 			<h2>メモ</h2>
-			{{ thesis.memo }}
+			<pre>{{ thesis.memo }}</pre>
 		</article>
 
 		<a :href=thesis.pdf :class="{'link-disabled': !thesis.pdf}" @click="!thesis.pdf ? $event.prevent() : null" target=_blank>PDFを開く</a>

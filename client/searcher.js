@@ -222,10 +222,13 @@ export class Marker {
 	}
 
 	get length() {
-		return this.to - this.from + 1;
+		return this.to - this.from;
 	}
 
 	merge(mark) {
+		if (!this.isOverwrapWith(mark)) {
+			throw 'is not overwraped';
+		}
 		return new Marker(Math.min(this.from, mark.from), Math.max(this.to, mark.to));
 	}
 }
@@ -313,7 +316,7 @@ export default class {
 		});
 
 		let html = '';
-		if (!thesis.data.text || textMarks === 0 || overviewMarks.length > 0) {
+		if (!thesis.data.text || textMarks.length === 0 || overviewMarks.length > 0) {
 			html = markup(thesis.data.overview, overviewMarks);
 		} else {
 			html = markup(thesis.data.text, textMarks);

@@ -370,6 +370,48 @@ describe('client', () => {
 				]);
 			});
 
+			describe('Marker', () => {
+				beforeEach(function() {
+					this.a = new Marker(0, 10, 'test');
+					this.b = new Marker(5, 20, 'hoge');
+					this.c = new Marker(15, 30, 'fuga');
+				});
+				it('props', function() {
+					assert.strictEqual(this.a.from, 0);
+					assert.strictEqual(this.a.to, 10);
+					assert.strictEqual(this.a.elm, 'test');
+
+					assert.strictEqual(this.b.from, 5);
+					assert.strictEqual(this.b.to, 20);
+					assert.strictEqual(this.b.elm, 'hoge');
+
+					assert.strictEqual(this.c.from, 15);
+					assert.strictEqual(this.c.to, 30);
+					assert.strictEqual(this.c.elm, 'fuga');
+				});
+				it('overwrap', function() {
+					assert.strictEqual(this.a.isOverwrapWith(this.b), true);
+					assert.strictEqual(this.a.isOverwrapWith(this.c), false);
+					assert.strictEqual(this.b.isOverwrapWith(this.c), true);
+				});
+				it('length', function() {
+					assert.strictEqual(this.a.length, 10);
+					assert.strictEqual(this.b.length, 15);
+					assert.strictEqual(this.c.length, 15);
+				});
+				it('merge', function() {
+					assert.strictEqual(this.a.merge(this.b).from, 0);
+					assert.strictEqual(this.a.merge(this.b).to, 20);
+
+					assert.strictEqual(this.b.merge(this.c).from, 5);
+					assert.strictEqual(this.b.merge(this.c).to, 30);
+
+					assert.throws(() => {
+						this.a.merge(this.c);
+					}, 'is not overwrapped');
+				});
+			});
+
 			it('search metadata', async function() {
 				assert.deepStrictEqual(await this.searcher.search('world', {
 					title: true,
