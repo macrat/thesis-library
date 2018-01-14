@@ -52,6 +52,25 @@ export default class {
 			.then(resp => resp.data.result == 'correct')
 	}
 
+	post(thesis) {
+		if (!thesis || !thesis.author || !thesis.degree || !thesis.year || !thesis.year || !thesis.overview || !thesis.pdf) {
+			return Promise.reject('missing member value');
+		}
+
+		return axios.post('/api/post', {
+			author: thesis.author,
+			degree: thesis.degree,
+			year: Number(thesis.year),
+			title: thesis.title,
+			overview: thesis.overview,
+			memo: thesis.memo,
+			pdf: thesis.pdf,
+		}).then(result => {
+			this.clearCache();
+			return result.data;
+		});
+	}
+
 	update(oldYear, oldAuthor, oldTitle, thesis, password) {
 		if (!oldYear || !oldAuthor || !oldTitle || !thesis || !password) {
 			return Promise.reject('missing argument');

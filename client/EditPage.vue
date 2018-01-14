@@ -165,6 +165,7 @@ export default {
 				this.uploading = false;
 				this.$router.push({ name: 'detail', params: { year: this.year, author: this.author, title: this.title }});
 			}).catch(err => {
+				alert('アップロードに失敗しました。\nしばらく待ってからもう一度試してみてください。');
 				console.error('failed to upload', err);
 			});
 		},

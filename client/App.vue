@@ -155,6 +155,10 @@ export default {
 				component: () => require.ensure([], require => require('./DetailPage'), '/detail'),
 			},
 			{
+				path: '/license',
+				component: () => require.ensure([], require => require('./License'), '/license'),
+			},
+			{
 				path: '*',
 				component: NotFound,
 			},

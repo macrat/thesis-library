@@ -27,9 +27,7 @@ app.post('/api/post', (req, res) => {
 		return;
 	}
 
-	if (!req.body.password) {
-		req.body.password = makePassword();
-	}
+	const password = makePassword();
 
 	let thesis = null;
 	try {
@@ -41,7 +39,7 @@ app.post('/api/post', (req, res) => {
 			overview: req.body.overview,
 			memo: req.body.memo,
 			pdf: req.body.pdf,
-			rawPassword: req.body.password,
+			rawPassword: password,
 		});
 	} catch(e) {
 		if (e.startsWith && e.startsWith('missing ')) {
@@ -56,7 +54,7 @@ app.post('/api/post', (req, res) => {
 	}
 
 	(new Database()).put(thesis)
-		.then(x => res.status(200).json({ password: req.body.password }))
+		.then(x => res.status(200).json({ password: password }))
 		.catch(err => {
 			console.error(err);
 			res.status(500).json({ error: 'something wrong' });

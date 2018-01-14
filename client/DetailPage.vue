@@ -22,7 +22,7 @@ pre {
 <template>
 	<div v-if="error === null">
 		<h1>{{ thesis.title }}</h1>
-		{{ thesis.year }}年度 {{ {bachelor: '学士', master: '修士', doctor: '博士' }[thesis.degree] }} {{ thesis.author }}<br>
+		{{ thesis.year }}年度 {{ thesis.author }} {{ {bachelor: '学士', master: '修士', doctor: '博士' }[thesis.degree] }}<br>
 		<article>
 			<h2>概要</h2>
 			<pre>{{ thesis.overview }}</pre>

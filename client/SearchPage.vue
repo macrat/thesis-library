@@ -113,7 +113,7 @@ mark {
 					><div>
 
 					<h2 v-html=thesis.titleHTML></h2>
-					<p>{{ thesis.year }}年度 {{ {bachelor: '学士', master: '修士', doctor: '博士' }[thesis.degree] }} <span v-html=thesis.authorHTML /></p>
+					<p>{{ thesis.year }}年度 <span v-html=thesis.authorHTML /> {{ {bachelor: '学士', master: '修士', doctor: '博士' }[thesis.degree] }}</p>
 					<div v-html=thesis.html />
 				</div></a>
 			</div>

@@ -1,7 +1,16 @@
 <style scoped src="./upload.css"></style>
 
+<style scoped>
+.uploaded-password {
+	display: inline-block;
+	background-color: #ffe0e0;
+	padding: .2em;
+	font-size: 120%;
+}
+</style>
+
 <template>
-	<div>
+	<div v-if="!uploadedPassword">
 		<h1>アップロードする</h1>
 		<form @submit.prevent=upload>
 			<p>
@@ -28,14 +37,30 @@
 			<pdf-viewer scale=0.3 :src=rawPDF />
 
 			<hr>
-
-			<label>修正用パスワード（省略可）： <input type=password v-model=password></label><br>
+			アップロードすることで<a href="/license" @click.prevent="$router.push({ path: '/license' })">利用規約</a>に同意したものみなします。<br>
 			<input type=submit value="アップロード">
 		</form>
 
 		<transition name=indicator>
 			<div class=uploading-indicator v-if=uploading><div>uploading...</div></div>
 		</transition>
+	</div>
+	<div v-else>
+		<h1>アップロードしました</h1>
+		<p>お疲れ様でした。ご協力ありがとうございます。</p>
+		<p>
+			あなたのファイルのパスワードは<span class=uploaded-password>{{ uploadedPassword }}</span>です。<br>
+			このパスワードを使うことで、再アップロードや編集、削除を行なうことが出来ます。
+		</p>
+		<p>
+			<a
+				:href="'/' + year + '/' + encodeURIComponent(author) + '/' + encodeURIComponent(title)"
+				@click.prevent="$router.push({ name: 'detail', params: { year: year, author: author, title: title }})">アップロードした論文を見る</a>
+
+			<a
+				href="/search"
+				@click.prevent="$router.push({ path: '/search' })">他の人の論文を見る</a>
+		</p>
 	</div>
 </template>
 
@@ -59,9 +84,9 @@ export default {
 			overview: '',
 			memo: '',
 			pdf: null,
-			password: '',
 
 			uploading: false,
+			uploadedPassword: null,
 		};
 	},
 	computed: {
@@ -104,7 +129,7 @@ export default {
 			}
 			this.uploading = true;
 
-			axios.post('/api/post', {
+			this.$client.post({
 				author: this.author,
 				degree: this.degree,
 				year: Number(this.year),
@@ -112,12 +137,11 @@ export default {
 				overview: this.overview,
 				memo: this.memo,
 				pdf: this.pdf,
-				password: this.password || null,
-			}).then(x => {
+			}).then(result => {
 				this.uploading = false;
-				this.$client.clearCache();
-				this.$router.push({ name: 'detail', params: { year: this.year, author: this.author, title: this.title }});
+				this.uploadedPassword = result.password;
 			}).catch(err => {
+				alert('アップロードに失敗しました。\nしばらく待ってからもう一度試してみてください。');
 				console.error('failed to upload', err);
 			});
 		},
