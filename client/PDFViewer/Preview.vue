@@ -47,7 +47,7 @@ import { TextLayerBuilder } from 'pdfjs-dist/lib/web/text_layer_builder.js';
 
 PDFJS.cMapUrl = "/cmaps/";
 PDFJS.cMapPacked = true;
-PDFJS.workerSrc = "/worker.js"
+PDFJS.workerSrc = "/pdf-worker.js"
 
 
 export default {

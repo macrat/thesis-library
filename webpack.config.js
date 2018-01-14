@@ -7,7 +7,8 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 module.exports = {
 	entry: {
 		app: path.join(__dirname, 'client/index.js'),
-		worker: path.join(__dirname, 'node_modules/pdfjs-dist/build/pdf.worker.js'),
+		'pdf-worker': path.join(__dirname, 'node_modules/pdfjs-dist/build/pdf.worker.js'),
+		'api-worker': path.join(__dirname, 'worker/index.js'),
 	},
 	output: {
 		filename: '[name].js',

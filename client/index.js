@@ -8,3 +8,8 @@ new Vue({
 	el: '#app',
 	render: h => h(App),
 });
+
+
+if ('serviceWorker' in navigator) {
+	navigator.serviceWorker.register('/api-worker.js', { scope: '/' });
+}

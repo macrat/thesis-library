@@ -84,14 +84,15 @@ export default {
 		load() {
 			this.error = null;
 
-			const quickData = this.$client.getQuickMetadata(Number(this.$route.params.year), this.$route.params.author, this.$route.params.title)
-			this.thesis.year = this.$route.params.year;
-			this.thesis.degree = quickData.degree || '';
-			this.thesis.title = this.$route.params.title;
-			this.thesis.author = this.$route.params.author;
-			this.thesis.overview = quickData.overview || '';
-			this.thesis.memo = '';
-			this.thesis.pdf = null;
+			this.$client.getQuickMetadata(Number(this.$route.params.year), this.$route.params.author, this.$route.params.title).then(quickData => {
+				this.thesis.year = this.$route.params.year;
+				this.thesis.degree = quickData.degree || '';
+				this.thesis.title = this.$route.params.title;
+				this.thesis.author = this.$route.params.author;
+				this.thesis.overview = quickData.overview || '';
+				this.thesis.memo = '';
+				this.thesis.pdf = null;
+			});
 
 			this.$client.getMetadata(Number(this.$route.params.year), this.$route.params.author, this.$route.params.title)
 				.then(meta => this.thesis = meta)

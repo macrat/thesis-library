@@ -17,21 +17,18 @@ export default class {
 	}
 
 	getMetadata(year, author, title) {
-		return axios.get(`${this.origin}/api/thesis/${year}/${author}/${title}/metadata`)
+		return axios.get(`${this.origin}/api/thesis/${year}/${encodeURIComponent(author)}/${encodeURIComponent(title)}/metadata`)
 			.then(response => response.data);
 	}
 
 	getQuickMetadata(year, author, title) {
-		if (!this._overviewIndex) {
-			return {};
+		if ('serviceWorker' in navigator) {
+			return axios.get(`${location.origin}/api-worker/quick-metadata/${year}/${encodeURIComponent(author)}/${encodeURIComponent(title)}`)
+				.then(response => response.data)
+				.catch(err => {});
+		} else {
+			return Promise.resolve({});
 		}
-
-		const found = this._overviewIndex.filter(x => x.year === year && x.author === author && x.title === title);
-		if (found.length !== 1) {
-			return {};
-		}
-
-		return found[0];
 	}
 
 	getYearList() {
@@ -82,6 +79,8 @@ export default class {
 		this._overviewIndex = null;
 		this._textIndex = null;
 		this._event.emit('clear-cache');
+
+		axios.get(`${location.origin}/api-worker/clear-cache`).catch(console.error);
 	}
 
 	on(name, fun) {
