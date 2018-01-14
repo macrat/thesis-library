@@ -47,7 +47,7 @@ function nonFilterQuery(elm, text) {
 
 
 function queryFunc(q) {
-	if (q[0] === '/' && q[q.length - 1] === '/') {
+	if (q.length >= 3 && q[0] === '/' && q[q.length - 1] === '/') {
 		return regexpQuery(q.slice(1, q.length - 1));
 	} else if (q.trim()) {
 		return stringQuery(q);

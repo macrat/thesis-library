@@ -83,13 +83,27 @@ describe('client', () => {
 
 			it('queryFunc', () => {
 				const re = debug.queryFunc('/a/');
-				assert.deepStrictEqual(re('re', '_/a/b/c/'), [[new Marker(2, 3, 're')]]);
+				assert.deepStrictEqual(re('re', '_/a/b/c//'), [[new Marker(2, 3, 're')]]);
 
 				const str = debug.queryFunc('_/a/');
-				assert.deepStrictEqual(str('str', '_/a/b/c/'), [[new Marker(0, 4, 'str')]]);
+				assert.deepStrictEqual(str('str', '_/a/b/c//'), [[new Marker(0, 4, 'str')]]);
 
 				const empty = debug.queryFunc('  ');
-				assert.deepStrictEqual(empty('empty', '_/a/b/c/'), [[new Marker(0, 0, 'empty')]]);
+				assert.deepStrictEqual(empty('empty', '_/a/b/c//'), [[new Marker(0, 0, 'empty')]]);
+
+				const slash1 = debug.queryFunc('/');
+				assert.deepStrictEqual(slash1('slash1', '_/a/b/c//'), [[
+					new Marker(1, 2, 'slash1'),
+					new Marker(3, 4, 'slash1'),
+					new Marker(5, 6, 'slash1'),
+					new Marker(7, 8, 'slash1'),
+					new Marker(8, 9, 'slash1'),
+				]]);
+
+				const slash2 = debug.queryFunc('//');
+				assert.deepStrictEqual(slash2('slash2', '_/a/b/c//'), [[
+					new Marker(7, 9, 'slash2'),
+				]]);
 			});
 
 			it('mergeFound', () => {
