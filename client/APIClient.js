@@ -21,14 +21,39 @@ export default class {
 			.then(response => response.data);
 	}
 
+	getQuickMetadata(year, author, title) {
+		if (!this._overviewIndex) {
+			return {};
+		}
+
+		const found = this._overviewIndex.filter(x => x.year === year && x.author === author && x.title === title);
+		if (found.length !== 1) {
+			return {};
+		}
+
+		return found[0];
+	}
+
 	getYearList() {
-		return axios.get(`${this.origin}/api/thesis/`)
-			.then(response => response.data)
+		if (this._overviewIndex) {
+			return Promise.resolve(this._overviewIndex.map(x => x.year).filter((x, i, xs) => xs.indexOf(x) === i));
+		} else {
+			return axios.get(`${this.origin}/api/thesis/`)
+				.then(response => response.data)
+		}
 	}
 
 	getThesisesOfYear(year) {
-		return axios.get(`${this.origin}/api/thesis/${year}/`)
-			.then(response => response.data)
+		if (this._overviewIndex) {
+			return Promise.resolve(this._overviewIndex.filter(x => x.year === year).map(x => ({
+				year: x.year,
+				author: x.author,
+				title: x.title,
+			})));
+		} else {
+			return axios.get(`${this.origin}/api/thesis/${year}/`)
+				.then(response => response.data)
+		}
 	}
 
 	getOverviewIndex() {
