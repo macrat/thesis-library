@@ -17,10 +17,24 @@ app.use(require('body-parser').json({ limit: '100mb' }));
 
 app.use(express.static(path.join(__dirname, '../build/')));
 
+
+function makePassword() {
+	const set = 'ABCDEFGHJKLMNRWXY347';
+	const r = [];
+	for (let i=0; i<6; i++) {
+		r.push(set[Math.floor(Math.random()*set.length)]);
+	}
+	return r.join('');
+}
+
 app.post('/api/post', (req, res) => {
 	if (!req.body.pdf) {
 		res.status(400).json({ error: 'missing pdf' });
 		return;
+	}
+
+	if (!req.body.password) {
+		req.body.password = makePassword();
 	}
 
 	let thesis = null;
@@ -39,7 +53,7 @@ app.post('/api/post', (req, res) => {
 	}
 
 	(new database.Database()).put(thesis)
-		.then(x => res.status(200).json({}))
+		.then(x => res.status(200).json({ password: req.body.password }))
 		.catch(err => {
 			console.error(err);
 			res.status(500).json({ error: 'something wrong' });

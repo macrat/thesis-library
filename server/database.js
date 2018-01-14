@@ -1,4 +1,5 @@
 const zlib = require('zlib');
+const md5 = require('md5');
 
 const Storage = require('@google-cloud/storage');
 const storage = Storage({ projectId: process.env.GCLOUD_PROJECT });
@@ -23,6 +24,7 @@ class Thesis {
 		this.overview = obj.overview;
 		this.memo = obj.memo || '';
 		this._rawPDF = obj.rawPDF;
+		this.password = md5(obj.password);
 
 		if (!this._rawPDF && typeof obj.pdf === 'string') {
 			this._rawPDF = new Buffer(obj.pdf, 'base64');
@@ -33,6 +35,7 @@ class Thesis {
 		if (!this.author) throw 'missing author';
 		if (!this.title) throw 'missing title';
 		if (!this.overview) throw 'missing overview';
+		if (!this.password) throw 'missing password';
 
 		if (this.degree !== 'bachelor' && this.degree !== 'master' && this.degree !== 'doctor') {
 			throw 'invalid degree';
@@ -68,6 +71,10 @@ class Thesis {
 			memo: this.memo,
 			pdf: `https://storage.googleapis.com/${process.env.GCLOUD_BUCKET}/${this.year}/${encodeURIComponent(this.author)}/${encodeURIComponent(this.title)}`,
 		};
+	}
+
+	checkPassword(password) {
+		return this.password === md5(password);
 	}
 }
 
@@ -132,6 +139,7 @@ class Database {
 							title: thesis.title,
 							overview: thesis.overview,
 							memo: thesis.memo,
+							password: thesis.password,
 						},
 					},
 				});

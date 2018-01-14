@@ -80,7 +80,7 @@
 
 			<hr>
 
-			<label>修正用パスワード（省略可）： <input type=password></label><br>
+			<label>修正用パスワード（省略可）： <input type=password v-model=password></label><br>
 			<input type=submit value="アップロード">
 		</form>
 
@@ -110,6 +110,7 @@ export default {
 			overview: '',
 			memo: '',
 			pdf: null,
+			password: '',
 
 			uploading: false,
 		};
@@ -162,6 +163,7 @@ export default {
 				overview: this.overview,
 				memo: this.memo,
 				pdf: this.pdf,
+				password: this.password || null,
 			}).then(x => {
 				this.uploading = false;
 				this.$client.clearCache();
