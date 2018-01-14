@@ -16,6 +16,7 @@
     "morgan": "^1.9.0",
     "pdf2json": "^1.1.7",
     "pdfjs-dist": "^2.0.258",
+    "uglifyjs-webpack-plugin": "^1.1.6",
     "vue": "^2.5.13",
     "vue-loader": "^13.7.0",
     "vue-router": "^3.0.1",
@@ -38,7 +39,8 @@
     "build": "NODE_ENV=production `npm bin`/webpack",
     "debug": "`npm bin`/npm-run-all --parallel debug:start debug:build",
     "debug:start": "NODE_ENV=development `npm bin`/nodemon -w ./server/ ./server",
-    "debug:build": "NODE_ENV=development `npm bin`/webpack --watch"
+    "debug:build": "NODE_ENV=development `npm bin`/webpack --watch",
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
