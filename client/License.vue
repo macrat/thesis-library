@@ -25,7 +25,7 @@ li {
 			</li>
 			<li>このサイト、またはこのサイトにアップロードされた論文を利用した事で生じたあらゆる不利益について、サイト管理者や論文の著者は責任を負いません。</li>
 			<li>このサイトとそのコンテンツは、突然利用出来なくなったり、内容が変更されたりする事があります。</li>
-			<li>不明な点があれば、<a href="mailto:m@crat.jp" target=_blank>サイト管理者</a>に問い合わせてください。</li>
+			<li>不明な点があれば、<a href="mailto:m@crat.jp" target=_blank>サイト管理者</a>に問い合わせるか、<a href="https://github.com/macrat/thesis-library/issues">GitHubのIssueトラッカー</a>に投稿してください。</li>
 		</ol>
 	</div>
 </template>
