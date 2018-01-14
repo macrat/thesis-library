@@ -167,7 +167,7 @@ export default {
 			}).then(x => {
 				this.uploading = false;
 				this.$client.clearCache();
-				this.$router.push({path: `/${this.year}/${this.author}/${this.title}`});
+				this.$router.push({ name: 'detail', params: { year: this.year, author: this.author, title: this.title }});
 			}).catch(err => {
 				console.error('failed to upload', err);
 			});

@@ -25,7 +25,7 @@ ul {
 							class=side-menu--button
 							:class="{ 'side-menu--button--active': thesis.year === detailShown.year && thesis.author === detailShown.author && thesis.title === detailShown.title }"
 							:href="'/' + year.num + '/' + encodeURIComponent(thesis.author) + '/' + encodeURIComponent(thesis.title)"
-							@click.prevent="$router.push({ path: '/' + year.num + '/' + encodeURIComponent(thesis.author) + '/' + encodeURIComponent(thesis.title) })">{{ thesis.title }}</a>
+							@click.prevent="$router.push({ name: 'detail', params: { year: year.num, author: thesis.author, title: thesis.title }})">{{ thesis.title }}</a>
 					</li>
 				</ul>
 			</li>

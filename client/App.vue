@@ -145,6 +145,7 @@ export default {
 				component: () => require.ensure([], require => require('./UploadPage'), '/upload'),
 			},
 			{
+				name: 'detail',
 				path: '/:year/:author/:title*',
 				component: () => require.ensure([], require => require('./DetailPage'), '/detail'),
 			},

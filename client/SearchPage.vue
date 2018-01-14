@@ -109,7 +109,7 @@ mark {
 			<div v-for="thesis in result">
 				<a
 					:href="'/' + thesis.year + '/' + encodeURIComponent(thesis.author) + '/' + encodeURIComponent(thesis.title)"
-					@click.prevent="$router.push({ path: '/' + thesis.year + '/' + encodeURIComponent(thesis.author) + '/' + encodeURIComponent(thesis.title)})"
+					@click.prevent="$router.push({ name: 'detail', params: { year: thesis.year, author: thesis.author, title: thesis.title }})"
 					><div>
 
 					<h2 v-html=thesis.titleHTML></h2>

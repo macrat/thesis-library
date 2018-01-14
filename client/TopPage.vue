@@ -6,8 +6,5 @@
 
 		<h2>ちゃんと動いてないけど</h2>
 		作りかけです。
-
-		<hr>
-		<a href="/2017/macrat/test" @click.stop.prevent="$router.push({path:'/2017/macrat/test'})">とりあえず詳細的な画面の試し</a>
 	</div>
 </template>
