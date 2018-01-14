@@ -160,11 +160,6 @@ export default {
 					this.pageTitle = this.options.query + ' - 論文を探す';
 				}
 
-				if (!this.options.query) {
-					this.reset();
-					return;
-				}
-
 				const now = new Date();
 				const year = now.getFullYear() - ((now.getMonth() < 3) ? 1 : 0);
 

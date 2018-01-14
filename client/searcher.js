@@ -173,11 +173,11 @@ function joinMarks(marks) {
 
 
 function markup(text, marks) {
+	marks = marks.filter(x => x.from !== x.to).sort((x, y) => x.from - y.from);
+
 	if (marks.length == 0) {
 		return sanitize(text.slice(0, 500));
 	}
-
-	marks = marks.filter(x => x.from !== x.to).sort((x, y) => x.from - y.from);
 
 	const offset = Math.max(0, marks[0].from - 251 + Math.round(marks[0].length/2));
 	marks = marks.filter(x => offset < x.to && x.from < offset + 500);
@@ -310,7 +310,7 @@ export default class {
 		});
 
 		let html = '';
-		if (!thesis.data.text || overviewMarks.length > 0) {
+		if (!thesis.data.text || textMarks === 0 || overviewMarks.length > 0) {
 			html = markup(thesis.data.overview, overviewMarks);
 		} else {
 			html = markup(thesis.data.text, textMarks);
