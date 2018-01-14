@@ -10,15 +10,11 @@ export default class {
 			this.origin = location.origin;
 		}
 
-		this._overviewIndex = null;
-		this._textIndex = null;
-
 		this._event = new EventEmitter();
 	}
 
 	getMetadata(year, author, title) {
-		return axios.get(`${this.origin}/api/thesis/${year}/${encodeURIComponent(author)}/${encodeURIComponent(title)}/metadata`)
-			.then(response => response.data);
+		return axios.get(`${this.origin}/api/thesis/${year}/${encodeURIComponent(author)}/${encodeURIComponent(title)}/metadata`).then(resp => resp.data);
 	}
 
 	getQuickMetadata(year, author, title) {
@@ -32,55 +28,27 @@ export default class {
 	}
 
 	getYearList() {
-		if (this._overviewIndex) {
-			return Promise.resolve(this._overviewIndex.map(x => x.year).filter((x, i, xs) => xs.indexOf(x) === i));
-		} else {
-			return axios.get(`${this.origin}/api/thesis/`)
-				.then(response => response.data)
-		}
+		return axios.get(`${this.origin}/api/thesis/`).then(resp => resp.data);
 	}
 
 	getThesisesOfYear(year) {
-		if (this._overviewIndex) {
-			return Promise.resolve(this._overviewIndex.filter(x => x.year === year).map(x => ({
-				year: x.year,
-				author: x.author,
-				title: x.title,
-			})));
-		} else {
-			return axios.get(`${this.origin}/api/thesis/${year}/`)
-				.then(response => response.data)
-		}
+		return axios.get(`${this.origin}/api/thesis/${year}/`).then(resp => resp.data);
 	}
 
 	getOverviewIndex() {
-		if (this._overviewIndex) {
-			return Promise.resolve(this._overviewIndex);
-		} else {
-			return axios.get(`${this.origin}/api/index/overview`).then(response => {
-				this._overviewIndex = response.data;
-				return this._overviewIndex;
-			});
-		}
+		return axios.get(`${this.origin}/api/index/overview`).then(resp => resp.data);
 	}
 
 	getTextIndex() {
-		if (this._textIndex) {
-			return Promise.resolve(this._textIndex);
-		} else {
-			return axios.get(`${this.origin}/api/index/text`).then(response => {
-				this._textIndex = response.data;
-				return this._textIndex;
-			});
-		}
+		return axios.get(`${this.origin}/api/index/text`).then(resp => resp.data);
 	}
 
 	clearCache() {
-		this._overviewIndex = null;
-		this._textIndex = null;
 		this._event.emit('clear-cache');
 
-		axios.get(`${location.origin}/api-worker/clear-cache`).catch(console.error);
+		if ('serviceWorker' in navigator) {
+			axios.get(`${location.origin}/api-worker/clear-cache`).catch(console.error);
+		}
 	}
 
 	on(name, fun) {
