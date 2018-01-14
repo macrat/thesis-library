@@ -1,8 +1,13 @@
 function stringQuery(query) {
+	const ignoreCase = !/[A-Z]/.test(query) && /[a-z]/.test(query);
 	const queries = query.split(' ').filter(x => x.length > 0);
 
 	return function(elm, text) {
 		const result = [];
+
+		if (ignoreCase) {
+			text = text.toLowerCase();
+		}
 
 		for (let q of queries) {
 			result.push([]);
@@ -25,7 +30,8 @@ function stringQuery(query) {
 
 
 function regexpQuery(query) {
-	const re = new RegExp(query, 'g');
+	const ignoreCase = !/[A-Z]/.test(query) && /[a-z]/.test(query);
+	const re = new RegExp(query, 'g' + (ignoreCase ? 'i' : ''));
 
 	return function(elm, text) {
 		re.lastIndex = 0;

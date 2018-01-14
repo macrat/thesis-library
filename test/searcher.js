@@ -66,6 +66,25 @@ describe('client', () => {
 				]);
 			});
 
+			it('stringQuery smart case', () => {
+				const lowerOnly = debug.stringQuery('abc');
+				assert.deepStrictEqual(lowerOnly('lower', 'abc aBc ABC'), [[
+					new Marker(0, 3, 'lower'),
+					new Marker(4, 7, 'lower'),
+					new Marker(8, 11, 'lower'),
+				]]);
+
+				const upperOnly = debug.stringQuery('ABC');
+				assert.deepStrictEqual(upperOnly('upper', 'abc aBc ABC'), [[
+					new Marker(8, 11, 'upper'),
+				]]);
+
+				const both = debug.stringQuery('aBc');
+				assert.deepStrictEqual(both('both', 'abc aBc ABC'), [[
+					new Marker(4, 7, 'both'),
+				]]);
+			});
+
 			it('regexpQuery', () => {
 				const q = debug.regexpQuery('ab?c');
 				let r;
@@ -79,6 +98,27 @@ describe('client', () => {
 				assert.deepStrictEqual(r, [
 					[],
 				]);
+			});
+
+			it('regexpQuery smart case', () => {
+				const lowerOnly = debug.regexpQuery('ab?c');
+				assert.deepStrictEqual(lowerOnly('lower', 'abc aBc ABC ac'), [[
+					new Marker(0, 3, 'lower'),
+					new Marker(4, 7, 'lower'),
+					new Marker(8, 11, 'lower'),
+					new Marker(12, 14, 'lower'),
+				]]);
+
+				const upperOnly = debug.regexpQuery('AB?C');
+				assert.deepStrictEqual(upperOnly('upper', 'abc aBc ABC ac'), [[
+					new Marker(8, 11, 'upper'),
+				]]);
+
+				const both = debug.regexpQuery('aB?c');
+				assert.deepStrictEqual(both('both', 'abc aBc ABC ac'), [[
+					new Marker(4, 7, 'both'),
+					new Marker(12, 14, 'both'),
+				]]);
 			});
 
 			it('queryFunc', () => {
