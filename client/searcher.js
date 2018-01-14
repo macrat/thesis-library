@@ -294,6 +294,9 @@ export default class {
 
 		thesis.founds.forEach(xs => {
 			xs.forEach(x => {
+				if (x.length === 0) {
+					return;
+				}
 				if (x.elm === 'title') {
 					titleMarks.push(x);
 				}
