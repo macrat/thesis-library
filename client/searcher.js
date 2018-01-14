@@ -168,7 +168,7 @@ function joinMarks(marks) {
 
 function markup(text, marks) {
 	if (marks.length == 0) {
-		return sanitize(text);
+		return sanitize(text.slice(0, 500));
 	}
 
 	marks = marks.filter(x => x.from !== x.to).sort((x, y) => x.from - y.from);
@@ -304,10 +304,10 @@ export default class {
 		});
 
 		let html = '';
-		if (thesis.data.text && (textMarks.length > 0 || overviewMarks.length === 0)) {
-			html = markup(thesis.data.text, textMarks);
-		} else {
+		if (!thesis.data.text || overviewMarks.length > 0) {
 			html = markup(thesis.data.overview, overviewMarks);
+		} else {
+			html = markup(thesis.data.text, textMarks);
 		}
 
 		return {

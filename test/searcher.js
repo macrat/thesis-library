@@ -537,6 +537,11 @@ describe('client', () => {
 					debug.markup('a'.repeat(1000) + ' hello ' + 'b'.repeat(1000), [new Marker(1001, 1006)]),
 					'a'.repeat(250 - 3) + ' <mark>hello</mark> ' + 'b'.repeat(250 - 3),
 				);
+
+				assert.strictEqual(
+					debug.markup('<b>test</b>' + 'a'.repeat(1000), []),
+					'&lt;b&gt;test&lt;/b&gt;' + 'a'.repeat(500 - 11),
+				);
 			});
 
 			it('makeHTML',  async function() {
