@@ -3,6 +3,8 @@ const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
+require('dotenv').config();
+
 
 module.exports = {
 	entry: {
@@ -27,6 +29,9 @@ module.exports = {
 		],
 	},
 	plugins: [
+		new webpack.DefinePlugin({
+			ANALYTICS_ID: JSON.stringify(process.env.ANALYTICS_ID),
+		}),
 		new CopyWebpackPlugin([{
 			from: path.join(__dirname, 'client/static'),
 			to: path.join(__dirname, 'build'),

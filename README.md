@@ -25,3 +25,4 @@ And, open http://localhost:8080/
 - GCLOUD\_PROJECT: Project name of Google Cloud Platform. Required.
 - GCLOUD\_BUCKET: Bucket name of Google Cloud Storage. Required.
 - GCLOUD\_SERVICE\_ACCOUNT: Credential json data of service account for access to Google Cloud Platform. Use default way to login if omitted.
+- ANALYTICS\_ID: Google Analytics ID. If omitted, don't track user access.

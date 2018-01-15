@@ -87,6 +87,7 @@ footer {
 <script>
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import VueAnalytics from 'vue-analytics';
 
 import APIClient from './APIClient';
 
@@ -120,50 +121,61 @@ Vue.mixin({
 Vue.prototype.$client = new APIClient();
 
 
+const router = new VueRouter({
+	mode: 'history',
+	scrollBehavior(to, from, savedPosition) {
+		if (savedPosition) {
+			return savedPosition;
+		} else{
+			return { x: 0, y: 0 };
+		}
+	},
+	routes: [
+		{
+			path: '/',
+			component: () => require.ensure([], require => require('./TopPage'), '/top'),
+		},
+		{
+			path: '/search',
+			component: () => require.ensure([], require => require('./SearchPage'), '/search'),
+		},
+		{
+			path: '/upload',
+			component: () => require.ensure([], require => require('./UploadPage'), '/upload'),
+		},
+		{
+			name: 'edit',
+			path: '/:year/:author/:title/edit',
+			component: () => require.ensure([], require => require('./EditPage'), '/edit'),
+		},
+		{
+			name: 'detail',
+			path: '/:year/:author/:title',
+			component: () => require.ensure([], require => require('./DetailPage'), '/detail'),
+		},
+		{
+			path: '/license',
+			component: () => require.ensure([], require => require('./LicensePage'), '/license'),
+		},
+		{
+			path: '*',
+			component: NotFound,
+		},
+	],
+});
+
+
+if (ANALYTICS_ID) {
+	Vue.use(VueAnalytics, {
+		id: ANALYTICS_ID,
+		router,
+	});
+}
+
+
 export default {
 	components: { SideMenu },
-	router: new VueRouter({
-		mode: 'history',
-		scrollBehavior(to, from, savedPosition) {
-			if (savedPosition) {
-				return savedPosition;
-			} else{
-				return { x: 0, y: 0 };
-			}
-		},
-		routes: [
-			{
-				path: '/',
-				component: () => require.ensure([], require => require('./TopPage'), '/top'),
-			},
-			{
-				path: '/search',
-				component: () => require.ensure([], require => require('./SearchPage'), '/search'),
-			},
-			{
-				path: '/upload',
-				component: () => require.ensure([], require => require('./UploadPage'), '/upload'),
-			},
-			{
-				name: 'edit',
-				path: '/:year/:author/:title/edit',
-				component: () => require.ensure([], require => require('./EditPage'), '/edit'),
-			},
-			{
-				name: 'detail',
-				path: '/:year/:author/:title',
-				component: () => require.ensure([], require => require('./DetailPage'), '/detail'),
-			},
-			{
-				path: '/license',
-				component: () => require.ensure([], require => require('./LicensePage'), '/license'),
-			},
-			{
-				path: '*',
-				component: NotFound,
-			},
-		],
-	}),
+	router: router,
 	watch: {
 		'$route': function() {
 			this.$refs.sitename.$el.focus();
