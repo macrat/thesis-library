@@ -5,6 +5,8 @@ Thesis Library
 
 The graduation thesis library of [Meguro laboratory](http://megurozemi.com/).
 
+![logo](client/static/favicon.svg)
+
 
 ## How to start
 
@@ -18,7 +20,8 @@ $ npm start  # or  $ npm run debug
 And, open http://localhost:8080/
 
 
-## Required environments
+## Environment variables
 
-- GCLOUD\_PROJECT: Project name of Google Cloud Platform.
-- GCLOUD\_BUCKET: Bucket name of Google Cloud Storage.
+- GCLOUD\_PROJECT: Project name of Google Cloud Platform. Required.
+- GCLOUD\_BUCKET: Bucket name of Google Cloud Storage. Required.
+- GCLOUD\_SERVICE\_ACCOUNT: Credential json data of service account for access to Google Cloud Platform. Use default way to login if omitted.

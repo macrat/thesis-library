@@ -156,7 +156,7 @@ export default {
 			},
 			{
 				path: '/license',
-				component: () => require.ensure([], require => require('./License'), '/license'),
+				component: () => require.ensure([], require => require('./LicensePage'), '/license'),
 			},
 			{
 				path: '*',
