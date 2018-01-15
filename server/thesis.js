@@ -13,11 +13,11 @@ class Thesis {
 		this.author = obj.author;
 		this.title = obj.title;
 		this.overview = obj.overview;
-		this.memo = obj.memo || '';
+		this.memo = obj.memo;
 		this._rawPDF = obj.rawPDF;
 		this.password = obj.password;
 		
-		if (!this.password && obj.rawPassword) {
+		if (!this.password && typeof obj.rawPassword === 'string') {
 			this.password = md5(obj.rawPassword);
 		}
 
@@ -25,12 +25,24 @@ class Thesis {
 			this._rawPDF = new Buffer(obj.pdf, 'base64');
 		}
 
-		if (!this.year) throw 'missing year';
-		if (!this.degree) throw 'missing degree';
-		if (!this.author) throw 'missing author';
-		if (!this.title) throw 'missing title';
-		if (!this.overview) throw 'missing overview';
-		if (!this.password) throw 'missing password';
+		if (this.memo === undefined) {
+			this.memo = '';
+		}
+
+
+		if (obj.year === undefined) throw 'missing year';
+		if (this.degree === undefined) throw 'missing degree';
+		if (this.author === undefined) throw 'missing author';
+		if (this.title === undefined) throw 'missing title';
+		if (this.overview === undefined) throw 'missing overview';
+		if (obj.password === undefined && obj.rawPassword === undefined) throw 'missing password';
+
+		if (!/^[0-9]+$/.test(obj.year)) throw 'invalid year';
+		if (typeof this.author !== 'string' || this.author.length === 0) throw 'invalid author';
+		if (typeof this.title !== 'string' || this.title.length === 0) throw 'invalid title';
+		if (typeof this.overview !== 'string' || this.overview.length === 0) throw 'invalid overview';
+		if (typeof this.memo !== 'string') throw 'invalid memo';
+		if (typeof this.password !== 'string' || this.password.length === 0) throw 'invalid password';
 
 		if (this.degree !== 'bachelor' && this.degree !== 'master' && this.degree !== 'doctor') {
 			throw 'invalid degree';

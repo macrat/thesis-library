@@ -7,9 +7,7 @@ import Thesis from '../../server/thesis';
 
 export default function() {
 	describe('constructor', () => {
-		it('missing arguments check', () => {
-			assert.throws(() => new Thesis());
-
+		it('satify arguments', () => {
 			assert.doesNotThrow(() => new Thesis({
 				year: 2017,
 				degree: 'bachelor',
@@ -19,7 +17,9 @@ export default function() {
 				memo: 'this is memo',
 				rawPassword: 'abc',
 			}));
+		});
 
+		it('year check', () => {
 			assert.throws(() => new Thesis({
 				degree: 'bachelor',
 				author: 'author',
@@ -33,6 +33,21 @@ export default function() {
 			});
 
 			assert.throws(() => new Thesis({
+				year: 'this year',
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'invalid year');
+				return true;
+			});
+		});
+
+		it('degree check', () => {
+			assert.throws(() => new Thesis({
 				year: 2017,
 				author: 'author',
 				title: 'title test',
@@ -44,51 +59,6 @@ export default function() {
 				return true;
 			});
 
-			assert.throws(() => new Thesis({
-				year: 2017,
-				degree: 'bachelor',
-				title: 'title test',
-				overview: 'this is overview',
-				memo: 'this is memo',
-				rawPassword: 'abc',
-			}), err => {
-				assert.equal(err, 'missing author');
-				return true;
-			});
-
-			assert.throws(() => new Thesis({
-				year: 2017,
-				degree: 'bachelor',
-				author: 'author',
-				overview: 'this is overview',
-				memo: 'this is memo',
-				rawPassword: 'abc',
-			}), err => {
-				assert.equal(err, 'missing title');
-				return true;
-			});
-
-			assert.throws(() => new Thesis({
-				year: 2017,
-				degree: 'bachelor',
-				author: 'author',
-				title: 'title test',
-				memo: 'this is memo',
-				rawPassword: 'abc',
-			}), err => {
-				assert.equal(err, 'missing overview');
-				return true;
-			});
-
-			assert.doesNotThrow(() => new Thesis({
-				year: 2017,
-				degree: 'bachelor',
-				author: 'author',
-				title: 'title test',
-				overview: 'this is overview',
-				rawPassword: 'abc',
-			}));
-
 			assert.doesNotThrow(() => new Thesis({
 				year: 2017,
 				degree: 'bachelor',
@@ -96,23 +66,9 @@ export default function() {
 				title: 'title test',
 				overview: 'this is overview',
 				memo: 'this is memo',
-				password: md5('abc'),
+				rawPassword: 'abc',
 			}));
 
-			assert.throws(() => new Thesis({
-				year: 2017,
-				degree: 'bachelor',
-				author: 'author',
-				title: 'title test',
-				overview: 'this is overview',
-				memo: 'this is memo',
-			}), err => {
-				assert.equal(err, 'missing password');
-				return true;
-			});
-		});
-
-		it('degree check', () => {
 			assert.doesNotThrow(() => new Thesis({
 				year: 2017,
 				degree: 'master',
@@ -143,6 +99,246 @@ export default function() {
 				rawPassword: 'abc',
 			}), err => {
 				assert.equal(err, 'invalid degree');
+				return true;
+			});
+		});
+
+		it('author check', () => {
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'missing author');
+				return true;
+			});
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: '',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'invalid author');
+				return true;
+			});
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: false,
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'invalid author');
+				return true;
+			});
+		});
+
+		it('title check', () => {
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'missing title');
+				return true;
+			});
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: '',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'invalid title');
+				return true;
+			});
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 42,
+				overview: 'this is overview',
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'invalid title');
+				return true;
+			});
+		});
+
+		it('overview check', () => {
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'missing overview');
+				return true;
+			});
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: '',
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'invalid overview');
+				return true;
+			});
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: null,
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'invalid overview');
+				return true;
+			});
+		});
+
+		it('memo check', () => {
+			assert.doesNotThrow(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				rawPassword: 'abc',
+			}));
+
+			assert.doesNotThrow(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: '',
+				rawPassword: 'abc',
+			}));
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: false,
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'invalid memo');
+				return true;
+			});
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 128,
+				rawPassword: 'abc',
+			}), err => {
+				assert.equal(err, 'invalid memo');
+				return true;
+			});
+		});
+
+		it('password check', () => {
+			assert.doesNotThrow(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			}));
+
+			assert.doesNotThrow(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				password: md5('abc'),
+			}));
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 'this is memo',
+			}), err => {
+				assert.equal(err, 'missing password');
+				return true;
+			});
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				rawPassword: null,
+			}), err => {
+				assert.equal(err, 'invalid password');
+				return true;
+			});
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				password: '',
+			}), err => {
+				assert.equal(err, 'invalid password');
+				return true;
+			});
+
+			assert.throws(() => new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				password: false,
+			}), err => {
+				assert.equal(err, 'invalid password');
 				return true;
 			});
 		});
