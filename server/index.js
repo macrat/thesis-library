@@ -52,9 +52,7 @@ app.post('/api/post', (req, res) => {
 			rawPassword: password,
 		});
 	} catch(e) {
-		if (e.startsWith && e.startsWith('missing ')) {
-			res.status(400).json({ error: e });
-		} else if (e === 'invalid degree') {
+		if (typeof e === 'string' && e.startsWith && (e.startsWith('missing ') || e.startsWith('invalid '))) {
 			res.status(400).json({ error: e });
 		} else {
 			console.error(e);
@@ -116,7 +114,39 @@ app.post(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/(.+)\/check-password$/, (req
 });
 
 
-app.post(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/([^\/]+)\/update$/, (req, res) => {
+app.delete(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/([^\/]+)$/, (req, res) => {
+	if (!req.body.password) {
+		res.status(400).json({ error: 'missing password' });
+		return;
+	}
+	if (typeof req.body.password !== 'string') {
+		res.status(400).json({ error: 'invalid password' });
+	}
+
+	const db = new Database();
+	db.get(Number(req.params[0]), decodeURIComponent(req.params[1]), decodeURIComponent(req.params[2]))
+		.then(thesis => {
+			if (!thesis.checkPassword(req.body.password)) {
+				res.status(403).json({ result: 'incorrect password' });
+			}
+
+			return db.remove(thesis);
+		})
+		.then(() => {
+			res.status(201).json({});
+		})
+		.catch(err => {
+			if (err.code === 404) {
+				res.status(404).json({ error: 'not found' });
+			} else {
+				console.error(err);
+				res.status(500).json({ error: 'something wrong' });
+			}
+		})
+});
+
+
+app.patch(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/([^\/]+)$/, (req, res) => {
 	if (!req.body.password) {
 		res.status(400).json({ error: 'missing password' });
 		return;
@@ -130,13 +160,14 @@ app.post(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/([^\/]+)\/update$/, (req, re
 		.catch(err => {
 			if (err.code === 404) {
 				res.status(404).json({ error: 'not found' });
+				return Promise.reject(null);
 			} else {
 				return Promise.reject(err);
 			}
 		})
 		.then(thesis => {
 			if (!thesis.checkPassword(req.body.password)) {
-				res.status(403).json({ result: 'incorrect' });
+				res.status(403).json({ result: 'incorrect password' });
 			}
 
 			let newThesis = null;
@@ -162,12 +193,11 @@ app.post(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/([^\/]+)\/update$/, (req, re
 			}
 		})
 		.then(() => {
-			res.status(200).json({});
+			res.status(201).json({});
 		})
 		.catch(err => {
-			if (typeof err === 'string' && err.startsWith && err.startsWith('missing ')) {
-				res.status(400).json({ error: err });
-			} else if (err === 'invalid degree') {
+			if (!err) {
+			} else if (typeof err === 'string' && err.startsWith && (err.startsWith('missing ') || err.startsWith('invalid '))) {
 				res.status(400).json({ error: err });
 			} else {
 				console.error(err);

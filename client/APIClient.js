@@ -90,7 +90,13 @@ export default class {
 			data.pdf = thesis.pdf;
 		}
 
-		return axios.post(`${this.origin}/api/thesis/${oldYear}/${encodeURIComponent(oldAuthor)}/${encodeURIComponent(oldTitle)}/update`, data).then(() => {
+		return axios.patch(`${this.origin}/api/thesis/${oldYear}/${encodeURIComponent(oldAuthor)}/${encodeURIComponent(oldTitle)}`, data).then(() => {
+			this.clearCache();
+		});
+	}
+
+	remove(year, author, title, password) {
+		return axios.delete(`${this.origin}/api/thesis/${year}/${encodeURIComponent(author)}/${encodeURIComponent(title)}`, { data: { password: password }}).then(() => {
 			this.clearCache();
 		});
 	}

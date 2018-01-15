@@ -29,11 +29,15 @@
 
 			<hr>
 
-			<input type=submit value="保存">
+			<button @click.prevent=remove>削除</button> <input type=submit value="保存">
 		</form>
 
 		<transition name=indicator>
 			<div class=uploading-indicator v-if=uploading><div>saving...</div></div>
+		</transition>
+
+		<transition name=indicator>
+			<div class=uploading-indicator v-if=removing><div>removing...</div></div>
 		</transition>
 	</div>
 	<not-found v-else-if="error === 'notfound'" />
@@ -67,6 +71,7 @@ export default {
 			password: null,
 
 			uploading: false,
+			removing: false,
 			error: null,
 		};
 	},
@@ -161,13 +166,31 @@ export default {
 				overview: this.overview,
 				memo: this.memo,
 				pdf: this.pdf || null,
-			}, this.password).then(x => {
+			}, this.password).then(() => {
 				this.uploading = false;
 				this.$router.push({ name: 'detail', params: { year: this.year, author: this.author, title: this.title }});
 			}).catch(err => {
 				alert('アップロードに失敗しました。\nしばらく待ってからもう一度試してみてください。');
+				this.uploading = false;
 				console.error('failed to upload', err);
 			});
+		},
+		remove() {
+			if (confirm('本当に削除しても宜しいですか？\n削除した論文を元に戻すことは出来ません。')) {
+				this.removing = true;
+
+				this.$client.remove(this.$route.params.year, this.$route.params.author, this.$route.params.title, this.password)
+					.then(() => {
+						this.removing = false;
+						alert('削除しました。');
+						this.$router.push({ path: '/' });
+					})
+					.catch(err => {
+						alert('削除に失敗しました。\nしばらく待ってからもう一度試してみてください。');
+						this.removing = false;
+						console.error('failed to remove', err);
+					});
+			}
 		},
 	},
 }
