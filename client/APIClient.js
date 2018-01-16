@@ -109,10 +109,12 @@ export default class {
 	}
 
 	clearCache() {
-		this._event.emit('clear-cache');
-
 		if ('serviceWorker' in navigator) {
-			axios.get(`${location.origin}/api-worker/clear-cache`).catch(console.error);
+			axios.get(`${location.origin}/api-worker/clear-cache`)
+				.then(() => this._event.emit('clear-cache'))
+				.catch(console.error)
+		} else {
+			this._event.emit('clear-cache');
 		}
 	}
 
