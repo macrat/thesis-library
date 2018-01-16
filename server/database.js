@@ -183,17 +183,15 @@ class Database {
 				}
 			})
 			.then(() => {
-				const file = this.bucket.file(oldThesis.key);
-
 				if (oldThesis.key !== newThesis.key) {
-					return file.move(newThesis.key).then(result => {
-						return result[0].makePublic().then(() => result[0]);
+					return this.bucket.file(oldThesis.key).move(newThesis.key).then(result => {
+						return result[0].makePublic();
 					})
-				} else {
-					return file;
 				}
 			})
-			.then(file => new Promise((resolve, reject) => {
+			.then(() => new Promise((resolve, reject) => {
+				const file = this.bucket.file(newThesis.key);
+
 				const newMetadata = JSON.stringify(newThesis.asSendableJSON());
 				if (newMetadata === JSON.stringify(oldThesis.asSendableJSON())) {
 					resolve();
@@ -201,11 +199,15 @@ class Database {
 				}
 
 				zlib.gzip(newMetadata, {level:9}, (err, binary) => {
-					return file.setMetadata({
+					if (err) {
+						reject(err);
+					}
+
+					resolve(file.setMetadata({
 						metadata: {
-							metadata: new Buffer(binary).asString('base64'),
+							metadata: new Buffer(binary).toString('base64'),
 						},
-					});
+					}));
 				});
 			}))
 			.then(() => null);

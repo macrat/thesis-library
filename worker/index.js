@@ -84,7 +84,14 @@ self.addEventListener('fetch', ev => {
 						headers: { 'Content-Type': 'application/json' },
 					}));
 				} else {
-					ev.respondWith(new Response(JSON.stringify(Object.assign({ downloadURL: gcsAddress + `${m[1]}/${m[2]}/${m[3]}` }, found[0])), {
+					const data = {
+						year: found[0].year,
+						author: found[0].author,
+						degree: found[0].degree,
+						overview: found[0].content,
+						downloadURL: gcsAddress + `${m[1]}/${m[2]}/${m[3]}`,
+					};
+					ev.respondWith(new Response(JSON.stringify(data), {
 						headers: { 'Content-Type': 'application/json' },
 					}));
 				}
@@ -137,7 +144,7 @@ self.addEventListener('fetch', ev => {
 			return;
 		}
 
-		if (/^\/api\/thesis\/20[0-9][0-9]\/[^\/]+\/[^\/]+$/.test(url.pathname)) {
+		if (/^\/api\/thesis\/20[0-9][0-9]\/[^\/]+\/[^\/]+$/.test(url.pathname) && ev.request.method === 'GET') {
 			const path = /^\/api\/thesis(\/20[0-9][0-9]\/[^\/]+\/[^\/]+)$/.exec(url.pathname)[1];
 
 			ev.respondWith(fetch(new Request(gcsAddress + path, { mode: 'cors' })).then(data => {
