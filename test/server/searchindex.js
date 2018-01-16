@@ -53,7 +53,7 @@ export default function() {
 				overview: 'test',
 				rawPassword: 'hogehoge',
 			});
-			this.index.append(newThesis, 'this is index content');
+			this.index.append(newThesis, { content: 'this is index content' });
 
 			const exceptArray = this.original.sort((x, y) => x.year - y.year);
 			exceptArray.push({
@@ -76,7 +76,7 @@ export default function() {
 				overview: 'test',
 				rawPassword: 'hogehoge',
 			});
-			this.index.append(newThesis, 'this is index content');
+			this.index.append(newThesis, { content: 'this is index content' });
 
 			const exceptArray = this.original.sort((x, y) => x.year - y.year);
 			exceptArray[0].content = 'this is index content';

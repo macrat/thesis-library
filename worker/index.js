@@ -88,7 +88,7 @@ self.addEventListener('fetch', ev => {
 						year: found[0].year,
 						author: found[0].author,
 						degree: found[0].degree,
-						overview: found[0].content,
+						overview: found[0].overview,
 						downloadURL: gcsAddress + `${m[1]}/${m[2]}/${m[3]}`,
 					};
 					ev.respondWith(new Response(JSON.stringify(data), {

@@ -15,13 +15,12 @@ class Index {
 	}
 
 	append(thesis, content) {
-		this.data[thesis.key] = {
+		this.data[thesis.key] = Object.assign({
 			year: thesis.year,
 			author: thesis.author,
 			title: thesis.title,
 			degree: thesis.degree,
-			content: content,
-		};
+		}, content);
 	}
 
 	remove(thesis) {
@@ -108,13 +107,13 @@ class Database {
 			})
 			.then(() => this.getOverviewIndex())
 			.then(overview => {
-				overview.append(thesis, thesis.overview);
+				overview.append(thesis, { overview: thesis.overview });
 
 				return this._putIndex('index/overview', overview);
 			})
 			.then(() => this.getTextIndex())
 			.then(text => {
-				text.append(thesis, thesisText);
+				text.append(thesis, { text: thesisText });
 
 				return this._putIndex('index/text', text);
 			})
@@ -155,7 +154,7 @@ class Database {
 						if (keyChanged || texts[0] !== texts[1]) {
 							return this.getTextIndex().then(text => {
 								text.remove(oldThesis);
-								text.append(newThesis, texts[1]);
+								text.append(newThesis, { text: texts[1] });
 
 								return this._putIndex('index/text', text);
 							});
@@ -165,7 +164,7 @@ class Database {
 					if (keyChanged) {
 						return Promise.all([oldThesis.getText(this.bucket), this.getTextIndex()]).then(data => {
 							data[1].remove(oldThesis);
-							data[1].append(newThesis, data[0]);
+							data[1].append(newThesis, { text: data[0] });
 
 							return this._putIndex('index/text', data[1]);
 						});
@@ -176,7 +175,7 @@ class Database {
 				if (keyChanged || oldThesis.overview !== newThesis.overview) {
 					return this.getOverviewIndex().then(overview => {
 						overview.remove(oldThesis);
-						overview.append(newThesis, newThesis.overview);
+						overview.append(newThesis, { overview: newThesis.overview });
 
 						return this._putIndex('index/overview', overview);
 					});
