@@ -26,3 +26,26 @@ And, open http://localhost:8080/
 - GCLOUD\_BUCKET: Bucket name of Google Cloud Storage. Required.
 - GCLOUD\_SERVICE\_ACCOUNT: Credential json data of service account for access to Google Cloud Platform. Use default way to login if omitted.
 - ANALYTICS\_ID: Google Analytics ID. If omitted, don't track user access.
+
+
+## CORS Settings of Google Cloud Storage
+You have to CORS settings because Thesis Library uses GCS from the client.
+
+First, make settings file like this.
+
+``` json
+[{
+	"maxAgeSeconds": 3600,
+	"method": ["GET", "HEAD"],
+	"origin": ["http://localhost:8080"],
+	"responseHeader": ["Content-Type", "x-goog-meta-metadata"]
+}]
+```
+
+Please change an origin to your domain if need.
+
+Then, send settings to GCS.
+
+``` shell
+$ gsutil cors set [FILENAME].json gs://[YOUR-BUCKET-NAME]
+```
