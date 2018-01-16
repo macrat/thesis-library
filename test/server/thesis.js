@@ -427,9 +427,9 @@ export default function() {
 		assert.strictEqual(json.memo, thesis.memo);
 		assert.strictEqual(json.password, undefined);
 
-		assert.strictEqual(typeof json.pdf, 'string');
-		assert.notStrictEqual(json.pdf.length, 0);
-		assert.doesNotThrow(() => new URL(json.pdf, 'http://test'));
+		assert.strictEqual(typeof json.downloadURL, 'string');
+		assert.notStrictEqual(json.downloadURL.length, 0);
+		assert.doesNotThrow(() => new URL(json.downloadURL, 'http://test'));
 	});
 
 	it('key', () => {

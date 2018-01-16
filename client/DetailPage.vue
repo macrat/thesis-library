@@ -94,17 +94,18 @@ export default {
 			this.thesis.downloadURL = null;
 
 			this.$client.getQuickMetadata(Number(this.$route.params.year), this.$route.params.author, this.$route.params.title).then(quickData => {
-				if (this.$route.params.year === quickData.year && this.$route.params.author === quickData.author && this.$route.params.title === quickData.title) {
+				if (Number(this.$route.params.year) === quickData.year && this.$route.params.author === quickData.author && this.$route.params.title === quickData.title) {
 					this.thesis.degree = quickData.degree || '';
 					this.thesis.overview = quickData.overview || '';
+					this.thesis.downloadURL = quickData.downloadURL || null;
 				}
 			});
 
 			this.$client.get(Number(this.$route.params.year), this.$route.params.author, this.$route.params.title)
 				.then(data => {
-					if (this.$route.params.year === data.metadata.year && this.$route.params.author === data.metadata.author && this.$route.params.title === data.metadata.title) {
-							this.thesis = data.metadata;
-							this.pdfData = data.pdf;
+					if (Number(this.$route.params.year) === data.metadata.year && this.$route.params.author === data.metadata.author && this.$route.params.title === data.metadata.title) {
+						this.thesis = data.metadata;
+						this.pdfData = data.pdf;
 					}
 				})
 				.catch(err => {

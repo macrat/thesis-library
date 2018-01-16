@@ -1,3 +1,8 @@
+import zlibjs from 'zlibjs';
+
+
+const gcsAddress = `https://storage.googleapis.com/${GCLOUD_BUCKET}`;
+
 let overviewCache = null;
 let textCache = null;
 
@@ -5,7 +10,7 @@ let overview = null;
 
 
 function FetchOverview() {
-	return fetch(new Request('/api/index/overview')).then(response => {
+	return fetch(new Request(gcsAddress + '/index/overview')).then(response => {
 		overviewCache = response.clone();
 
 		return response.clone().json().then(json => {
@@ -79,7 +84,7 @@ self.addEventListener('fetch', ev => {
 						headers: { 'Content-Type': 'application/json' },
 					}));
 				} else {
-					ev.respondWith(new Response(JSON.stringify(found[0]), {
+					ev.respondWith(new Response(JSON.stringify(Object.assign({ downloadURL: gcsAddress + `${m[1]}/${m[2]}/${m[3]}` }, found[0])), {
 						headers: { 'Content-Type': 'application/json' },
 					}));
 				}
@@ -104,7 +109,7 @@ self.addEventListener('fetch', ev => {
 			if (textCache) {
 				ev.respondWith(textCache.clone());
 			} else {
-				ev.respondWith(fetch(ev.request).then(response => {
+				ev.respondWith(fetch(gcsAddress + '/index/text').then(response => {
 					textCache = response.clone();
 					return response;
 				}));
@@ -129,6 +134,33 @@ self.addEventListener('fetch', ev => {
 			} else {
 				ev.respondWith(FetchOverview().then(() => ThesisesOfYear(year)));
 			}
+			return;
+		}
+
+		if (/^\/api\/thesis\/20[0-9][0-9]\/[^\/]+\/[^\/]+$/.test(url.pathname)) {
+			const path = /^\/api\/thesis(\/20[0-9][0-9]\/[^\/]+\/[^\/]+)$/.exec(url.pathname)[1];
+
+			ev.respondWith(fetch(new Request(gcsAddress + path, { mode: 'cors' })).then(data => {
+				return new Promise((resolve, reject) => {
+					zlibjs.gunzip(new Buffer(data.headers.get('x-goog-meta-metadata'), 'base64'), (err, buf) => {
+						if (err) {
+							reject(err);
+						} else {
+							resolve(new Buffer(buf).toString());
+						}
+					});
+				}).then(metadata => {
+					return data.blob().then(blob => new Response(blob, {
+						ok: data.ok,
+						status: data.status,
+						url: url,
+						headers: new Headers({
+							'Content-Type': 'application/pdf',
+							'Thesis-Library-metadata': new Buffer(metadata).toString('base64'),
+						}),
+					}));
+				});
+			}));
 			return;
 		}
 	}

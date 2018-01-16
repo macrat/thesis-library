@@ -30,6 +30,7 @@ module.exports = {
 	},
 	plugins: [
 		new webpack.DefinePlugin({
+			GCLOUD_BUCKET: JSON.stringify(process.env.GCLOUD_BUCKET),
 			ANALYTICS_ID: JSON.stringify(process.env.ANALYTICS_ID),
 		}),
 		new CopyWebpackPlugin([{

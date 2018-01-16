@@ -57,7 +57,15 @@ class Database {
 
 	get(year, author, title) {
 		return this.bucket.file(makeKey(year, author, title)).getMetadata().then(data => {
-			return new Thesis(data[1].metadata);
+			return new Promise((resolve, reject) => {
+				zlib.gunzip(new Buffer(data[1].metadata.metadata, 'base64'), (err, metadata) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(new Thesis(Object.assign(JSON.parse(metadata.toString()), { password: data[1].metadata.password })));
+					}
+				});
+			});
 		});
 	}
 
@@ -75,26 +83,28 @@ class Database {
 
 				const file = this.bucket.file(thesis.key);
 
-				const stream = file.createWriteStream({
-					metadata: {
-						contentType: "application/pdf",
-						cacheControl: 24 * 60 * 60,
+				zlib.gzip(JSON.stringify(thesis.asSendableJSON()), {level:9}, (err, binary) => {
+					if (err) {
+						reject(err);
+						return;
+					}
+
+					const stream = file.createWriteStream({
 						metadata: {
-							year: thesis.year,
-							degree: thesis.degree,
-							author: thesis.author,
-							title: thesis.title,
-							overview: thesis.overview,
-							memo: thesis.memo,
-							password: thesis.password,
+							contentType: "application/pdf",
+							cacheControl: 24 * 60 * 60,
+							metadata: {
+								metadata: new Buffer(binary).toString('base64'),
+								password: thesis.password,
+							},
 						},
-					},
+					});
+
+					stream.on('finish', x => resolve(file.makePublic()));
+					stream.on('error', reject);
+
+					stream.end(thesis._rawPDF);
 				});
-
-				stream.on('finish', x => resolve(file.makePublic()));
-				stream.on('error', reject);
-
-				stream.end(thesis._rawPDF);
 			})
 			.then(() => this.getOverviewIndex())
 			.then(overview => {
@@ -132,36 +142,8 @@ class Database {
 	}
 
 	updateMetadata(oldThesis, newThesis) {
-		let metadata = {};
-		let metadataChanged = false;
-
-		if (newThesis.year !== oldThesis.year) {
-			metadata.year = newThesis.year;
-			metadataChanged = true;
-		}
-		if (newThesis.degree !== oldThesis.degree) {
-			metadata.degree = newThesis.degree;
-			metadataChanged = true;
-		}
-		if (newThesis.author !== oldThesis.author) {
-			metadata.author = newThesis.author;
-			metadataChanged = true;
-		}
-		if (newThesis.title !== oldThesis.title) {
-			metadata.title = newThesis.title;
-			metadataChanged = true;
-		}
-		if (newThesis.overview !== oldThesis.overview) {
-			metadata.overview = newThesis.overview;
-			metadataChanged = true;
-		}
-		if (newThesis.memo !== oldThesis.memo) {
-			metadata.memo = newThesis.memo;
-			metadataChanged = true;
-		}
 		if (newThesis.password !== oldThesis.password) {
-			metadata.password = newThesis.password;
-			metadataChanged = true;
+			throw 'can not change password';
 		}
 
 		const keyChanged = oldThesis.key !== newThesis.key;
@@ -211,13 +193,21 @@ class Database {
 					return file;
 				}
 			})
-			.then(file => {
-				if (metadataChanged) {
-					return file.setMetadata({
-						metadata: metadata,
-					});
+			.then(file => new Promise((resolve, reject) => {
+				const newMetadata = JSON.stringify(newThesis.asSendableJSON());
+				if (newMetadata === JSON.stringify(oldThesis.asSendableJSON())) {
+					resolve();
+					return;
 				}
-			})
+
+				zlib.gzip(newMetadata, {level:9}, (err, binary) => {
+					return file.setMetadata({
+						metadata: {
+							metadata: new Buffer(binary).asString('base64'),
+						},
+					});
+				});
+			}))
 			.then(() => null);
 	}
 
