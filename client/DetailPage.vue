@@ -33,12 +33,12 @@ pre {
 			<pre>{{ thesis.memo }}</pre>
 		</article>
 
-		<a :href=thesis.pdf :class="{'link-disabled': !thesis.pdf}" @click="!thesis.pdf ? $event.prevent() : null" target=_blank>PDFを開く</a>
+		<a :href=thesis.downloadURL :class="{'link-disabled': !thesis.downloadURL}" @click="!thesis.pdf ? $event.prevent() : null" target=_blank>PDFを開く</a>
 		<a
 			:href="`/${thesis.year}/${encodeURIComponent(thesis.author)}/${encodeURIComponent(thesis.title)}/edit`"
-			:class="{'link-disabled': !thesis.pdf}"
+			:class="{'link-disabled': !thesis.downloadURL}"
 			@click.prevent="edit">編集</a>
-		<pdf-viewer :src=thesis.pdf :selectable=true />
+		<pdf-viewer :src=pdfData :selectable=true />
 	</div>
 	<not-found v-else-if="error === 'notfound'" />
 	<failed-to-load v-else />
@@ -67,8 +67,9 @@ export default {
 				title: this.$route.params.title,
 				overview: '',
 				memo: '',
-				pdf: null,
+				downloadURL: null,
 			},
+			pdfData: null,
 			error: null,
 		};
 	},
@@ -85,20 +86,25 @@ export default {
 		load() {
 			this.error = null;
 
+			this.thesis.year = this.$route.params.year;
+			this.thesis.title = this.$route.params.title;
+			this.thesis.author = this.$route.params.author;
+			this.thesis.memo = '';
+			this.pdfData = null;
+			this.thesis.downloadURL = null;
+
 			this.$client.getQuickMetadata(Number(this.$route.params.year), this.$route.params.author, this.$route.params.title).then(quickData => {
-				this.thesis.year = this.$route.params.year;
 				this.thesis.degree = quickData.degree || '';
-				this.thesis.title = this.$route.params.title;
-				this.thesis.author = this.$route.params.author;
 				this.thesis.overview = quickData.overview || '';
-				this.thesis.memo = '';
-				this.thesis.pdf = null;
 			});
 
-			this.$client.getMetadata(Number(this.$route.params.year), this.$route.params.author, this.$route.params.title)
-				.then(meta => this.thesis = meta)
+			this.$client.get(Number(this.$route.params.year), this.$route.params.author, this.$route.params.title)
+				.then(data => {
+					this.thesis = data.metadata;
+					this.pdfData = data.pdf;
+				})
 				.catch(err => {
-					if (err.response.status === 404) {
+					if (err.response && err.response.status === 404) {
 						this.error = 'notfound';
 					} else {
 						console.error(err);

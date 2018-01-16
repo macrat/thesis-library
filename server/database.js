@@ -61,6 +61,10 @@ class Database {
 		});
 	}
 
+	getPDF(thesis) {
+		return thesis.getPDF(this.bucket);
+	}
+
 	put(thesis) {
 		return thesis.getText(this.bucket).then(thesisText => {
 			return new Promise((resolve, reject) => {

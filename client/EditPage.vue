@@ -25,7 +25,7 @@
 			<hr>
 
 			<input @change=fileChange type=file accept=".pdf" ref=fileinput><button @click.prevent="pdf = null; $refs.fileinput.value = null">変更しない</button><br>
-			<pdf-viewer scale=0.3 :src=rawPDF />
+			<pdf-viewer scale=0.3 :src=previewPDF />
 
 			<hr>
 
@@ -66,8 +66,8 @@ export default {
 			title: this.$route.params.title,
 			overview: '',
 			memo: '',
-			pdf: null,
-			pdfURL: null,
+			newPDF: null,
+			oldPDF: null,
 			password: null,
 
 			uploading: false,
@@ -81,15 +81,15 @@ export default {
 			this.overview = quickData.overview || '';
 		});
 
-		this.$client.getMetadata(Number(this.$route.params.year), this.$route.params.author, this.$route.params.title)
-			.then(meta => {
-				this.overview = meta.overview;
-				this.degree = meta.degree;
-				this.memo = meta.memo;
-				this.pdfURL = meta.pdf;
+		this.$client.get(Number(this.$route.params.year), this.$route.params.author, this.$route.params.title)
+			.then(data => {
+				this.overview = data.metadata.overview;
+				this.degree = data.metadata.degree;
+				this.memo = data.metadata.memo;
+				this.oldPDF = data.pdf;
 			})
 			.catch(err => {
-				if (err.response.status === 404) {
+				if (err.ersponse && err.response.status === 404) {
 					this.error = 'notfound';
 				} else {
 					console.error(err);
@@ -119,11 +119,11 @@ export default {
 		}
 	},
 	computed: {
-		rawPDF() {
-			if (this.pdf === null) {
-				return this.pdfURL;
+		previewPDF() {
+			if (this.newPDF === null) {
+				return this.oldPDF;
 			} else {
-				return new Buffer(this.pdf, 'base64');
+				return new Buffer(this.newPDF, 'base64');
 			}
 		},
 	},
@@ -136,7 +136,7 @@ export default {
 
 			if (file.type !== 'application/pdf') {
 				alert('PDF以外をアップロードすることは出来ません。');
-				this.pdf = null;
+				this.newPDF = null;
 				this.$refs.fileinput.value = '';
 				return;
 			}
@@ -144,10 +144,10 @@ export default {
 			const reader = new FileReader();
 
 			reader.onload = () => {
-				this.pdf = reader.result.substr(reader.result.indexOf(',') + 1);
+				this.newPDF = reader.result.substr(reader.result.indexOf(',') + 1);
 			};
 			reader.onerror = () => {
-				this.pdf = 'error';
+				this.newPDF = 'error';
 				this.$refs.fileinput.value = '';
 			};
 			reader.readAsDataURL(file);
@@ -165,7 +165,7 @@ export default {
 				title: this.title,
 				overview: this.overview,
 				memo: this.memo,
-				pdf: this.pdf || null,
+				pdf: this.newPDF || null,
 			}, this.password).then(() => {
 				this.uploading = false;
 				this.$router.push({ name: 'detail', params: { year: this.year, author: this.author, title: this.title }});

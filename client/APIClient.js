@@ -13,8 +13,15 @@ export default class {
 		this._event = new EventEmitter();
 	}
 
-	getMetadata(year, author, title) {
-		return axios.get(`${this.origin}/api/thesis/${year}/${encodeURIComponent(author)}/${encodeURIComponent(title)}/metadata`).then(resp => resp.data);
+	get(year, author, title) {
+		return axios({
+			method: 'get',
+			url: `${this.origin}/api/thesis/${year}/${encodeURIComponent(author)}/${encodeURIComponent(title)}`,
+			responseType: 'arraybuffer',
+		}).then(resp => ({
+			metadata: JSON.parse(new Buffer(resp.headers['thesis-library-metadata'], 'base64').toString()),
+			pdf: resp.data,
+		}));
 	}
 
 	getQuickMetadata(year, author, title) {

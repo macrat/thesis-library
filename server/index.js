@@ -70,10 +70,16 @@ app.post('/api/post', (req, res) => {
 });
 
 
-app.get(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/(.+)\/metadata$/, (req, res) => {
+app.get(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/([^\/]+)$/, (req, res) => {
 	const db = new Database();
 	db.get(Number(req.params[0]), decodeURIComponent(req.params[1]), decodeURIComponent(req.params[2]))
-		.then(thesis => res.status(200).json(thesis.asSendableJSON()))
+		.then(thesis => {
+			db.getPDF(thesis).then(pdf => {
+				res.set('Thesis-Library-Metadata', new Buffer(JSON.stringify(thesis.asSendableJSON())).toString('base64'));
+				res.set('Content-Type', 'application/pdf');
+				res.status(200).send(pdf);
+			});
+		})
 		.catch(err => {
 			if (err.code === 404) {
 				res.status(404).json({ error: 'not found' });
@@ -85,7 +91,7 @@ app.get(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/(.+)\/metadata$/, (req, res) 
 });
 
 
-app.post(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/(.+)\/check-password$/, (req, res) => {
+app.post(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/([^\/]+)\/check-password$/, (req, res) => {
 	if (!req.body.password) {
 		res.status(400).json({ error: 'missing password' });
 		return;

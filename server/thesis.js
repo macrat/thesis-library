@@ -80,7 +80,7 @@ class Thesis {
 			title: this.title,
 			overview: this.overview,
 			memo: this.memo,
-			pdf: `https://storage.googleapis.com/${process.env.GCLOUD_BUCKET}/${this.year}/${encodeURIComponent(this.author)}/${encodeURIComponent(this.title)}`,
+			downloadURL: `https://storage.googleapis.com/${process.env.GCLOUD_BUCKET}/${this.year}/${encodeURIComponent(this.author)}/${encodeURIComponent(this.title)}`,
 		};
 	}
 
