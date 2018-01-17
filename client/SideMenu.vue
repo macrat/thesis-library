@@ -55,7 +55,7 @@ export default {
 	},
 	created() {
 		this.$client.getYearList().then(years => {
-			this.years = years.map(y => ({ num: y, thesises: null })).sort((x, y) => x.num - y.num);
+			this.years = years.map(y => ({ num: y, thesises: null })).sort((x, y) => y.num - x.num);
 			if (this.years.length > 0) {
 				this.open(this.years[0].num);
 			}
@@ -77,7 +77,25 @@ export default {
 
 			if (year.thesises === null) {
 				this.$client.getThesisesOfYear(yearNum).then(xs => {
-					year.thesises = xs.sort();
+					year.thesises = xs.sort((x, y) => {
+						const xTitle = x.title.toLowerCase();
+						const yTitle = y.title.toLowerCase();
+						if (xTitle < yTitle) {
+							return -1;
+						} else if (xTitle > yTitle) {
+							return 1;
+						}
+
+						const xAuthor = x.author.toLowerCase();
+						const yAuthor = y.author.toLowerCase();
+						if (xAuthor < yAuthor) {
+							return -1;
+						} else if (xAuthor > yAuthor) {
+							return 1;
+						}
+
+						return 0;
+					});
 				});
 			}
 		},
@@ -90,7 +108,7 @@ export default {
 		},
 		clearCache() {
 			this.$client.getYearList().then(years => {
-				this.years = years.map(y => ({ num: y, thesises: null })).sort((x, y) => x.num - y.num);
+				this.years = years.map(y => ({ num: y, thesises: null })).sort((x, y) => y.num - x.num);
 				this.open(this.current);
 			});
 		},
