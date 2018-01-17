@@ -72,10 +72,7 @@ export default class {
 			overview: thesis.overview,
 			memo: thesis.memo,
 			pdf: thesis.pdf,
-		}).then(result => {
-			this.clearCache();
-			return result.data;
-		});
+		}).then(result => this.clearCache().then(() => result.data));
 	}
 
 	update(oldYear, oldAuthor, oldTitle, thesis, password) {
@@ -97,24 +94,23 @@ export default class {
 			data.pdf = thesis.pdf;
 		}
 
-		return axios.patch(`${this.origin}/api/thesis/${oldYear}/${encodeURIComponent(oldAuthor)}/${encodeURIComponent(oldTitle)}`, data).then(() => {
-			this.clearCache();
-		});
+		return axios.patch(`${this.origin}/api/thesis/${oldYear}/${encodeURIComponent(oldAuthor)}/${encodeURIComponent(oldTitle)}`, data)
+			.then(() => this.clearCache());
 	}
 
 	remove(year, author, title, password) {
-		return axios.delete(`${this.origin}/api/thesis/${year}/${encodeURIComponent(author)}/${encodeURIComponent(title)}`, { data: { password: password }}).then(() => {
-			this.clearCache();
-		});
+		return axios.delete(`${this.origin}/api/thesis/${year}/${encodeURIComponent(author)}/${encodeURIComponent(title)}`, { data: { password: password }})
+			.then(() => this.clearCache());
 	}
 
 	clearCache() {
 		if ('serviceWorker' in navigator) {
-			axios.get(`${location.origin}/api-worker/clear-cache`)
+			return axios.get(`${location.origin}/api-worker/clear-cache`)
 				.then(() => this._event.emit('clear-cache'))
 				.catch(console.error)
 		} else {
 			this._event.emit('clear-cache');
+			return Promise.resolve();
 		}
 	}
 

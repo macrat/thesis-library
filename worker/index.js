@@ -64,9 +64,9 @@ self.addEventListener('fetch', ev => {
 			textCache = null;
 			overview = null;
 
-			ev.respondWith(new Response());
-
-			FetchOverview().catch(console.error);
+			ev.respondWith(FetchOverview()
+				.then(() => new Response('', { status: 201 }))
+				.catch(() => new Response('', { status: 500 })));
 
 			return;
 		}
