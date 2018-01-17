@@ -55,7 +55,7 @@ export default {
 	},
 	created() {
 		this.$client.getYearList().then(years => {
-			this.years = years.map(y => ({ num: y, thesises: null }));
+			this.years = years.map(y => ({ num: y, thesises: null })).sort((x, y) => x.num - y.num);
 			if (this.years.length > 0) {
 				this.open(this.years[0].num);
 			}
@@ -76,7 +76,9 @@ export default {
 			this.current = yearNum;
 
 			if (year.thesises === null) {
-				this.$client.getThesisesOfYear(yearNum).then(xs => year.thesises = xs);
+				this.$client.getThesisesOfYear(yearNum).then(xs => {
+					year.thesises = xs.sort();
+				});
 			}
 		},
 		openClose(yearNum) {
@@ -88,7 +90,7 @@ export default {
 		},
 		clearCache() {
 			this.$client.getYearList().then(years => {
-				this.years = years.map(y => ({ num: y, thesises: null }));
+				this.years = years.map(y => ({ num: y, thesises: null })).sort((x, y) => x.num - y.num);
 				this.open(this.current);
 			});
 		},
