@@ -1,7 +1,14 @@
-const md5 = require('md5');
+const crypto = require('crypto');
 
 const pdf = require('./pdf');
 const makeKey = require('./utils').makeKey;
+
+
+function encryptPassword(password) {
+	const hmac = crypto.createHmac('sha256', process.env.PASSWORD_SECRET);
+	hmac.update(password);
+	return hmac.digest('hex');
+}
 
 
 class Thesis {
@@ -18,7 +25,7 @@ class Thesis {
 		this.password = obj.password;
 		
 		if (!this.password && typeof obj.rawPassword === 'string') {
-			this.password = md5(obj.rawPassword);
+			this.password = encryptPassword(`${this.year}/${this.author}/${this.title}:${obj.rawPassword}`);
 		}
 
 		if (!this._rawPDF && typeof obj.pdf === 'string') {
@@ -85,7 +92,10 @@ class Thesis {
 	}
 
 	checkPassword(password) {
-		return this.password === md5(password);
+		if (typeof password !== 'string') {
+			return false;
+		}
+		return this.password === encryptPassword(`${this.year}/${this.author}/${this.title}:${password}`);
 	}
 }
 

@@ -1,11 +1,19 @@
 import assert from 'power-assert';
-import md5 from 'md5';
 import { URL } from 'url';
 
 import Thesis from '../../server/thesis';
 
 
 export default function() {
+	beforeEach(function() {
+		this.original_password_secret = process.env.PASSWORD_SECRET;
+		process.env.PASSWORD_SECRET = 'test';
+	});
+
+	afterEach(function() {
+		process.env.PASSWORD_SECRET = this.original_password_secret;
+	});
+
 	describe('constructor', () => {
 		it('satify arguments', () => {
 			assert.doesNotThrow(() => new Thesis({
@@ -281,6 +289,16 @@ export default function() {
 				rawPassword: 'abc',
 			}));
 
+			const t = new Thesis({
+				year: 2017,
+				degree: 'bachelor',
+				author: 'author',
+				title: 'title test',
+				overview: 'this is overview',
+				memo: 'this is memo',
+				rawPassword: 'abc',
+			});
+
 			assert.doesNotThrow(() => new Thesis({
 				year: 2017,
 				degree: 'bachelor',
@@ -288,7 +306,7 @@ export default function() {
 				title: 'title test',
 				overview: 'this is overview',
 				memo: 'this is memo',
-				password: md5('abc'),
+				password: t.password,
 			}));
 
 			assert.throws(() => new Thesis({
@@ -359,7 +377,8 @@ export default function() {
 			assert.strictEqual(withMemo.author, 'author');
 			assert.strictEqual(withMemo.overview, 'this is overview');
 			assert.strictEqual(withMemo.memo, 'this is memo');
-			assert.strictEqual(withMemo.password, md5('abc'));
+			assert.notStrictEqual(withMemo.password, 'abc');
+			assert.strictEqual(withMemo.rawPassword, undefined);
 
 			const withoutMemo = new Thesis({
 				year: 2017,
@@ -375,7 +394,8 @@ export default function() {
 			assert.strictEqual(withoutMemo.author, 'author');
 			assert.strictEqual(withoutMemo.overview, 'this is overview');
 			assert.strictEqual(withoutMemo.memo, '');
-			assert.strictEqual(withoutMemo.password, md5('abc'));
+			assert.notStrictEqual(withoutMemo.password, 'abc');
+			assert.strictEqual(withoutMemo.rawPassword, undefined);
 		});
 	});
 
@@ -391,7 +411,9 @@ export default function() {
 
 		assert.strictEqual(raw.checkPassword('abc'), true);
 		assert.strictEqual(raw.checkPassword('abcd'), false);
-		assert.strictEqual(raw.checkPassword(md5('abc')), false);
+		assert.strictEqual(raw.checkPassword(''), false);
+		assert.strictEqual(raw.checkPassword(123), false);
+		assert.strictEqual(raw.checkPassword(null), false);
 
 		const encoded = new Thesis({
 			year: 2017,
@@ -399,12 +421,14 @@ export default function() {
 			author: 'author',
 			title: 'title test',
 			overview: 'this is overview',
-			password: md5('abc'),
+			password: raw.password,
 		});
 
 		assert.strictEqual(encoded.checkPassword('abc'), true);
 		assert.strictEqual(encoded.checkPassword('abcd'), false);
-		assert.strictEqual(encoded.checkPassword(md5('abc')), false);
+		assert.strictEqual(encoded.checkPassword(''), false);
+		assert.strictEqual(encoded.checkPassword(123), false);
+		assert.strictEqual(encoded.checkPassword(null), false);
 	});
 
 	it('asSendableJSON', () => {
