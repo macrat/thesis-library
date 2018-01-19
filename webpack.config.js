@@ -32,7 +32,6 @@ module.exports = {
 		new webpack.DefinePlugin({
 			GCLOUD_BUCKET: JSON.stringify(process.env.GCLOUD_BUCKET),
 			ANALYTICS_ID: JSON.stringify(process.env.ANALYTICS_ID),
-			API_SERVER_ORIGIN: JSON.stringify(process.env.API_SERVER_ORIGIN || null),
 		}),
 		new CopyWebpackPlugin([{
 			from: path.join(__dirname, 'client/static'),

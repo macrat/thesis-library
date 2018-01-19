@@ -58,7 +58,7 @@ self.addEventListener('activate', ev => {
 self.addEventListener('fetch', ev => {
 	const url = new URL(ev.request.url);
 
-	if (url.origin === (API_SERVER_ORIGIN || location.origin)) {
+	if (url.origin === location.origin) {
 		if (url.pathname === '/api-worker/clear-cache') {
 			overviewCache = null;
 			textCache = null;

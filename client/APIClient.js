@@ -3,7 +3,7 @@ import axios from 'axios';
 
 
 export default class {
-	constructor(origin=API_SERVER_ORIGIN) {
+	constructor(origin=null) {
 		if (origin) {
 			this.origin = origin;
 		} else {
