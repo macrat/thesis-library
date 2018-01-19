@@ -1,8 +1,5 @@
 language: node_js
 
 node_js:
+  - "8"
   - "9"
-
-after_success:
-  - npm install firebase-tools
-  - ./node_modules/.bin/firebase deploy --project $FIREBASE_PROJECT --token $FIREBASE_TOKEN
