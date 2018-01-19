@@ -51,11 +51,11 @@ And, opening http://localhost:8080/
 ### Optional
 
 - GCLOUD\_SERVICE\_ACCOUNT: Credential json data of service account for access to Google Cloud Platform. Use default way to login if omitted.
+
 - ANALYTICS\_ID: Google Analytics ID. If omitted, don't track user access.
+
 - CONTENT\_SERVER\_ORIGIN:  URL for contents server (maybe, URL of firebase). Don't have to if contents server and API server work on the same origin.
 - API\_SERVER\_ORIGIN: URL for API server (maybe, URL of heroku). Don't have to if contents server and API server work on the same origin.
-
-### For Travis-ci
 
 - FIREBASE\_TOKEN: Token of Firebase Hosting.
 - FIREBASE\_PROJECT Project name of Firebase Hosting.
