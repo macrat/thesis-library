@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 
 
 if (process.env.CONTENTS_SERVER_ORIGIN) {
-	app.user((req, res, next) => {
+	app.use((req, res, next) => {
 		res.set('Access-Control-Allow-Origin', process.env.CONTENTS_SERVER_ORIGIN);
 		res.set('Access-Control-Allow-Methods', 'GET,POST,PATCH,HEAD,OPTIONS');
 		res.set('Access-Control-Expose-Headers', 'Thesis-Library-Metadata');
