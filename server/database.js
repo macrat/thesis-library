@@ -198,8 +198,10 @@ class Database {
 					}
 
 					resolve(file.setMetadata({
+						contentType: "application/pdf",
 						metadata: {
 							metadata: new Buffer(binary).toString('base64'),
+							password: thesis.password,
 						},
 					}));
 				});
