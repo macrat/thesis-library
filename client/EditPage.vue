@@ -168,7 +168,7 @@ export default {
 			}
 			this.uploading = true;
 
-			const startTime = new Date();
+			const startTime = performance ? performance.now() : new Date();
 
 			this.$client.update(this.$route.params.year, this.$route.params.author, this.$route.params.title, {
 				author: this.author,
@@ -184,8 +184,8 @@ export default {
 				this.uploading = false;
 				this.$router.push({ name: 'detail', params: { year: this.year, author: this.author, title: this.title }});
 
-				this.$ga.event('edit', 'loaded', `/${this.year}/${this.author}/${this.title}`);
-				this.$ga.time('edit', 'upload', endTime - startTime, `/${this.year}/${this.author}/${this.title}`);
+				this.$ga.event('edit', 'uploaded', `/${this.year}/${this.author}/${this.title}`);
+				this.$ga.time('edit', `/${this.year}/${this.author}/${this.title}`, (performance ? performance.now() : new Date()) - startTime, 'upload');
 			}).catch(err => {
 				alert('アップロードに失敗しました。\nしばらく待ってからもう一度試してみてください。');
 				this.uploading = false;

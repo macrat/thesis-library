@@ -129,7 +129,7 @@ export default {
 			}
 			this.uploading = true;
 
-			const startTime = new Date();
+			const startTime = performance ? performance.now() : new Date();
 
 			this.$client.post({
 				author: this.author,
@@ -144,7 +144,7 @@ export default {
 				this.uploadedPassword = result.password;
 
 				this.$ga.event('upload', 'uploaded', `/${this.year}/${this.author}/${this.title}`);
-				this.$ga.time('upload', 'upload', new Date() - startTime, `/${this.year}/${this.author}/${this.title}`);
+				this.$ga.time('upload', `/${this.year}/${this.author}/${this.title}`, (performance ? performance.now() : new Date()) - startTime, 'upload');
 			}).catch(err => {
 				alert('アップロードに失敗しました。\nしばらく待ってからもう一度試してみてください。');
 				this.uploading = false;
