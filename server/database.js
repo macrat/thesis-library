@@ -140,10 +140,6 @@ class Database {
 	}
 
 	updateMetadata(oldThesis, newThesis) {
-		if (newThesis.password !== oldThesis.password) {
-			throw 'can not change password';
-		}
-
 		const keyChanged = oldThesis.key !== newThesis.key;
 
 		return Promise.resolve()
