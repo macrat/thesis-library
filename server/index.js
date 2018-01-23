@@ -74,7 +74,7 @@ app.get(/^\/api\/thesis\/(20[0-9][0-9])\/([^\/]+)\/([^\/]+)$/, (req, res) => {
 	const db = new Database();
 	db.get(Number(req.params[0]), decodeURIComponent(req.params[1]), decodeURIComponent(req.params[2]))
 		.then(thesis => {
-			db.getPDF(thesis).then(pdf => {
+			return db.getPDF(thesis).then(pdf => {
 				res.set('Thesis-Library-Metadata', new Buffer(JSON.stringify(thesis.asSendableJSON())).toString('base64'));
 				res.set('Content-Type', 'application/pdf');
 				res.status(200).send(pdf);

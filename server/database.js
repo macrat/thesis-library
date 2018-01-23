@@ -201,7 +201,7 @@ class Database {
 						contentType: "application/pdf",
 						metadata: {
 							metadata: new Buffer(binary).toString('base64'),
-							password: thesis.password,
+							password: newThesis.password,
 						},
 					}));
 				});
