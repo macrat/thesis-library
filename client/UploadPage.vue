@@ -129,6 +129,8 @@ export default {
 			}
 			this.uploading = true;
 
+			const startTime = new Date();
+
 			this.$client.post({
 				author: this.author,
 				degree: this.degree,
@@ -140,10 +142,19 @@ export default {
 			}).then(result => {
 				this.uploading = false;
 				this.uploadedPassword = result.password;
+
+				this.$ga.event('upload', 'uploaded', `/${this.year}/${this.author}/${this.title}`);
+				this.$ga.time('upload', 'upload', new Date() - startTime, `/${this.year}/${this.author}/${this.title}`);
 			}).catch(err => {
 				alert('アップロードに失敗しました。\nしばらく待ってからもう一度試してみてください。');
 				this.uploading = false;
 				console.error(err);
+
+				if (err.response) {
+					this.$ga.exception(err.response.data);
+				} else {
+					this.$ga.exception(err.message || err);
+				}
 			});
 		},
 	},

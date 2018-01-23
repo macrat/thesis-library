@@ -168,6 +168,9 @@ const router = new VueRouter({
 if (ANALYTICS_ID) {
 	Vue.use(VueAnalytics, {
 		id: ANALYTICS_ID,
+		autoTracking: {
+			exception: true,
+		},
 		router,
 	});
 }
