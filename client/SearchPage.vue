@@ -25,6 +25,11 @@ h2 {
 	outline: none;
 }
 
+.search-result--hit-num {
+	float: right;
+	color: #666;
+}
+
 .search-options {
 	display: flex;
 	flex-wrap: wrap;
@@ -107,6 +112,7 @@ mark {
 			</div>
 		</div>
 		<div class=search-result>
+			<span class=search-result--hit-num>{{ result.length }}件ヒット</span>
 			<div v-for="thesis in result">
 				<a
 					:href="'/' + thesis.year + '/' + encodeURIComponent(thesis.author) + '/' + encodeURIComponent(thesis.title)"
@@ -199,9 +205,11 @@ export default {
 					text: this.options.textEnabled,
 				};
 
+				const startTime = performance ? performance.now() : now;
+
 				this.searcher.search(this.options.query, options).then(result => {
 					this.result = result.map(x => this.searcher.makeHTML(x));
-					this.$ga.time('search', this.options.query, new Date() - now, 'search speed');
+					this.$ga.time('search', this.options.query, (performance ? performance.now() : new Date()) - startTime, 'search speed');
 				}).catch(err => {
 					console.error(err);
 					this.reset();

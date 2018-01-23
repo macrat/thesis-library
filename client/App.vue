@@ -173,6 +173,12 @@ if (ANALYTICS_ID) {
 		},
 		router,
 	});
+} else {
+	Vue.prototype.$ga = {
+		event: console.log,
+		time: console.log,
+		exception: console.log,
+	};
 }
 
 
