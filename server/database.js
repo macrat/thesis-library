@@ -91,7 +91,6 @@ class Database {
 					const stream = file.createWriteStream({
 						metadata: {
 							contentType: "application/pdf",
-							cacheControl: 24 * 60 * 60,
 							metadata: {
 								metadata: new Buffer(binary).toString('base64'),
 								password: thesis.password,
@@ -232,7 +231,7 @@ class Database {
 						metadata: {
 							contentType: "application/json",
 							contentEncoding: 'gzip',
-							cacheControl: 24 * 60 * 60,
+							cacheControl: 0,
 						},
 					});
 
