@@ -110,11 +110,19 @@ export default {
 				.then(ok => {
 					if (!ok) {
 						this.$router.push({ name: 'detail', params: this.$route.params });
+
+						this.$ga.event('edit', 'incorrect password', `/${this.year}/${this.author}/${this.title}`);
 					}
 				})
 				.catch(err => {
 					console.error(err);
 					this.$router.push({ name: 'detail', params: this.$route.params });
+
+					if (err.response) {
+						this.$ga.exception(err.response.data);
+					} else {
+						this.$ga.exception(err.message || err);
+					}
 				})
 		}
 	},
@@ -146,9 +154,11 @@ export default {
 			reader.onload = () => {
 				this.newPDF = reader.result.substr(reader.result.indexOf(',') + 1);
 			};
-			reader.onerror = () => {
+			reader.onerror = err => {
 				this.newPDF = 'error';
 				this.$refs.fileinput.value = '';
+
+				this.$ga.exception(err.message || err);
 			};
 			reader.readAsDataURL(file);
 		},
@@ -157,6 +167,8 @@ export default {
 				return;
 			}
 			this.uploading = true;
+
+			const startTime = performance ? performance.now() : new Date();
 
 			this.$client.update(this.$route.params.year, this.$route.params.author, this.$route.params.title, {
 				author: this.author,
@@ -167,12 +179,23 @@ export default {
 				memo: this.memo,
 				pdf: this.newPDF || null,
 			}, this.password).then(() => {
+				const endTime = new Date();
+
 				this.uploading = false;
 				this.$router.push({ name: 'detail', params: { year: this.year, author: this.author, title: this.title }});
+
+				this.$ga.event('edit', 'uploaded', `/${this.year}/${this.author}/${this.title}`);
+				this.$ga.time('edit', `/${this.year}/${this.author}/${this.title}`, (performance ? performance.now() : new Date()) - startTime, 'upload');
 			}).catch(err => {
 				alert('アップロードに失敗しました。\nしばらく待ってからもう一度試してみてください。');
 				this.uploading = false;
 				console.error('failed to upload', err);
+
+				if (err.response) {
+					this.$ga.exception(err.response.data);
+				} else {
+					this.$ga.exception(err.message || err);
+				}
 			});
 		},
 		remove() {
@@ -184,11 +207,19 @@ export default {
 						this.removing = false;
 						alert('削除しました。');
 						this.$router.push({ path: '/' });
+
+						this.$ga.event('edit', 'removed', `/${this.year}/${this.author}/${this.title}`);
 					})
 					.catch(err => {
 						alert('削除に失敗しました。\nしばらく待ってからもう一度試してみてください。');
 						this.removing = false;
 						console.error('failed to remove', err);
+
+						if (err.response) {
+							this.$ga.exception(err.response.data);
+						} else {
+							this.$ga.exception(err.message || err);
+						}
 					});
 			}
 		},

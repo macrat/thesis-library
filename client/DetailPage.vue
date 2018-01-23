@@ -115,6 +115,11 @@ export default {
 						console.error(err);
 						this.error = 'unknown';
 					}
+					if (err.response) {
+						this.$ga.exception(err.response.data);
+					} else {
+						this.$ga.exception(err.message || err);
+					}
 				})
 		},
 		edit() {
@@ -131,10 +136,19 @@ export default {
 							}});
 						} else {
 							alert('パスワードが違います。');
+
+							this.$ga.event('edit', 'incorrect password', `/${this.year}/${this.author}/${this.title}`);
 						}
 					})
 					.catch(err => {
+						console.error(err);
 						this.error = 'unknown';
+
+						if (err.response) {
+							this.$ga.exception(err.response.data);
+						} else {
+							this.$ga.exception(err.message || err);
+						}
 					})
 			}
 		},

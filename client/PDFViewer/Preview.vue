@@ -95,6 +95,8 @@ export default {
 				return;
 			}
 
+			const startTime = new Date();
+
 			PDFJS.getDocument(this.src)
 				.then(pdf => {
 					this.pdfData = pdf;
@@ -109,6 +111,8 @@ export default {
 						pagesNum: this.pagesNum,
 					});
 
+					this.$ga.time('PDFViewer', 'load', new Date() - startTime, 'PDF load');
+
 					this.rendering();
 				})
 				.catch(err => {
@@ -120,12 +124,16 @@ export default {
 					});
 					console.error(err);
 					this.showError();
+
+					this.$ga.exception(err.message || err);
 				})
 		},
 		rendering() {
 			if (this.pdfData === null) {
 				this.load();
 			} else {
+				const startTime = new Date();
+
 				this.pdfData.getPage(this.page)
 					.then(page => {
 						this.pageData = page;
@@ -147,6 +155,8 @@ export default {
 							viewport: this.viewport,
 						});
 
+						this.$ga.time('PDFViewer', 'render', new Date() - startTime, 'PDF render');
+
 						if (this.selectable) {
 							return page.getTextContent()
 						} else {
@@ -162,6 +172,8 @@ export default {
 						});
 						textLayer.setTextContent(content);
 						textLayer.render();
+
+						this.$ga.time('PDFViewer', 'render with text layer', new Date() - startTime, 'PDF render with text layer');
 					})
 					.catch(err => {
 						this.$emit('failed-to-rendering', {
@@ -171,6 +183,8 @@ export default {
 							pdf: this.pdfData,
 							error: err,
 						});
+
+						this.$ga.exception(err.message || err);
 					})
 			}
 		},

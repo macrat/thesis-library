@@ -25,6 +25,11 @@ h2 {
 	outline: none;
 }
 
+.search-result--hit-num {
+	float: right;
+	color: #666;
+}
+
 .search-options {
 	display: flex;
 	flex-wrap: wrap;
@@ -107,6 +112,7 @@ mark {
 			</div>
 		</div>
 		<div class=search-result>
+			<span class=search-result--hit-num>{{ result.length }}件ヒット</span>
 			<div v-for="thesis in result">
 				<a
 					:href="'/' + thesis.year + '/' + encodeURIComponent(thesis.author) + '/' + encodeURIComponent(thesis.title)"
@@ -123,6 +129,8 @@ mark {
 </template>
 
 <script>
+import debounce from 'lodash-es/debounce';
+
 import Searcher from './searcher';
 
 
@@ -140,7 +148,8 @@ export default {
 				authorEnabled: false,
 				overviewEnabled: true,
 				textEnabled: false,
-			}
+			},
+			searchCount: 0,
 		};
 	},
 	mounted() {
@@ -150,11 +159,33 @@ export default {
 		searcher() {
 			return new Searcher(this.$client);
 		},
+		searchTrack() {
+			return debounce(() => {
+				this.searchCount++;
+				this.$ga.event('search', 'query', this.options.query, this.searchCount);
+				this.$ga.event('search', 'options', JSON.stringify({
+					query: this.options.query,
+					year: {
+						from: this.options.yearFrom,
+						to: this.options.yearTo,
+					},
+					degree: this.options.degree,
+					searchBy: {
+						title: this.options.titleEnabled,
+						author: this.options.authorEnabled,
+						overview: this.options.overviewEnabled,
+						text: this.options.textEnabled,
+					},
+				}), this.searchCount);
+			}, 500);
+		},
 	},
 	watch: {
 		options: {
 			deep: true,
 			handler() {
+				this.searchTrack();
+
 				if (!this.options.query) {
 					this.pageTitle = '論文を探す';
 				} else {
@@ -174,11 +205,20 @@ export default {
 					text: this.options.textEnabled,
 				};
 
+				const startTime = performance ? performance.now() : now;
+
 				this.searcher.search(this.options.query, options).then(result => {
 					this.result = result.map(x => this.searcher.makeHTML(x));
+					this.$ga.time('search', this.options.query, (performance ? performance.now() : new Date()) - startTime, 'search speed');
 				}).catch(err => {
 					console.error(err);
 					this.reset();
+
+					if (err.response) {
+						this.$ga.exception(err.response.data);
+					} else {
+						this.$ga.exception(err.message || err);
+					}
 				});
 			},
 		},
@@ -187,7 +227,14 @@ export default {
 		reset() {
 			this.$client.getOverviewIndex().then(xs => {
 				this.result = xs.map(x => this.searcher.makeHTML({ data: x, founds: [] }));
-			}).catch(console.error);
+			}).catch(err => {
+				console.error(err);
+				if (err.response) {
+					this.$ga.exception(err.response.data);
+				} else {
+					this.$ga.exception(err.message || err);
+				}
+			});
 		},
 	},
 }
