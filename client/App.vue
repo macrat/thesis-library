@@ -36,7 +36,7 @@ header > a:focus {
 	margin: .5em 0;
 	padding: 0 1em;
 	width: 15em;
-	min-width: 10em;
+	max-width: 13em;
 }
 
 .content-area {

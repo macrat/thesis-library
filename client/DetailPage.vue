@@ -12,6 +12,7 @@ h2 {
 
 pre {
 	font-family: unset;
+	white-space: pre-wrap;
 }
 
 .link-disabled {
